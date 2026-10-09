@@ -189,7 +189,7 @@
                     <button type="button" data-skin="classic" class="sword-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
                         <span class="text-xl flex-shrink-0">🗡️</span>
                         <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Cutlass Bajak Laut</p>
+                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Bajak Laut</p>
                             <p class="text-[9px] text-amber-300/80 truncate">Baja & Gagang Kayu</p>
                         </div>
                     </button>
@@ -467,6 +467,49 @@
                     osc.stop(now + 0.18);
                 } catch(e) {}
             },
+            playCursedSoul() {
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const now = this.ctx.currentTime;
+                    // Low eerie fundamental tone
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.exponentialRampToValueAtTime(320, now + 0.25);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.6);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(now + 0.6);
+
+                    // Spectral ghostly whispering noise
+                    const bufferSize = this.ctx.sampleRate * 0.5;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(650, now);
+                    filter.frequency.linearRampToValueAtTime(1200, now + 0.25);
+                    filter.frequency.linearRampToValueAtTime(350, now + 0.5);
+                    filter.Q.setValueAtTime(4.0, now);
+                    const nGain = this.ctx.createGain();
+                    nGain.gain.setValueAtTime(0.25, now);
+                    nGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    noise.connect(filter);
+                    filter.connect(nGain);
+                    nGain.connect(this.ctx.destination);
+                    noise.start(now);
+                } catch(e) {}
+            },
             playExplode() {
                 try {
                     this.init();
@@ -522,6 +565,7 @@
         let particles = [];
         let woodenShards = [];
         let activeLightningEffects = [];
+        let activeMistEffects = [];
         let cameraShakeIntensity = 0;
         let headAnimFrame = null;
 
@@ -1693,6 +1737,66 @@
             });
         }
 
+        function spawnCursedBoneMist(sword, colorHex) {
+            AudioFX.playCursedSoul();
+
+            const mistGroup = new THREE.Group();
+            mistGroup.position.set(0, 0, 0); // Hole center at wood surface
+            sword.add(mistGroup);
+
+            // Spectral toxic green point light
+            const mistLight = new THREE.PointLight(0x22c55e, 3.2, 2.8, 2.0);
+            mistLight.position.set(0, 0, 0.08);
+            mistGroup.add(mistLight);
+
+            const puffs = [];
+            const numPuffs = 28;
+            const greenPalette = [0x22c55e, 0x16a34a, 0x4ade80, 0x15803d, 0x86efac, 0x10b981, 0x059669];
+
+            for (let i = 0; i < numPuffs; i++) {
+                const puffGeo = new THREE.IcosahedronGeometry(0.12, 1);
+                const puffColor = greenPalette[Math.floor(Math.random() * greenPalette.length)];
+                const puffMat = new THREE.MeshBasicMaterial({
+                    color: puffColor,
+                    transparent: true,
+                    opacity: 0.55,
+                    depthWrite: false
+                });
+                const mesh = new THREE.Mesh(puffGeo, puffMat);
+                
+                const angle = (i / numPuffs) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+                const startR = 0.06 + Math.random() * 0.08; // Inside collar
+                const x = Math.cos(angle) * startR;
+                const y = Math.sin(angle) * startR;
+                const z = 0.035 - (x * x * 0.21);
+                
+                mesh.position.set(x, y, z);
+                const baseScale = 0.65 + Math.random() * 0.8;
+                mesh.scale.set(baseScale, baseScale, baseScale);
+                mistGroup.add(mesh);
+
+                puffs.push({
+                    mesh: mesh,
+                    angle: angle,
+                    curR: startR,
+                    speed: 0.007 + Math.random() * 0.013,
+                    swirl: (Math.random() - 0.5) * 0.035,
+                    rise: 0.003 + Math.random() * 0.006,
+                    yOffset: 0,
+                    baseScale: baseScale,
+                    baseAlpha: 0.45 + Math.random() * 0.25
+                });
+            }
+
+            activeMistEffects.push({
+                group: mistGroup,
+                sword: sword,
+                light: mistLight,
+                puffs: puffs,
+                progress: 0.0
+            });
+        }
+
         function plugSwordIntoSlot(slotId, colorHex = 0xff4444, skinType = 'classic') {
             const slot = slots.find(s => s.id === slotId);
             if (!slot || slot.plugged) return;
@@ -1718,6 +1822,8 @@
 
             if (skinType === 'laser') {
                 spawnPlasmaCrawlingLightning(sword, colorHex);
+            } else if (skinType === 'bone') {
+                spawnCursedBoneMist(sword, colorHex);
             } else {
                 AudioFX.playInsert();
             }
@@ -2039,6 +2145,57 @@
                         if (ra.line.material) ra.line.material.dispose();
                     });
                     activeLightningEffects.splice(i, 1);
+                }
+            }
+
+            // Animate Cursed Bone Blade Toxic Green Soul Mist Effect
+            for (let i = activeMistEffects.length - 1; i >= 0; i--) {
+                const eff = activeMistEffects[i];
+                eff.progress += 0.015; // ~66 frames duration (~1.1s)
+                const p = eff.progress;
+
+                // Spreading phase: mist puffs billow and crawl outward
+                // Fade out phase (0.35 -> 1.0)
+                let alpha = 1.0;
+                if (p > 0.35) {
+                    alpha = Math.max(0.0, 1.0 - (p - 0.35) / 0.65);
+                }
+
+                if (eff.light) {
+                    eff.light.intensity = alpha * (2.8 + Math.sin(p * 20) * 0.4);
+                }
+
+                // Update creeping mist puffs
+                eff.puffs.forEach(puff => {
+                    puff.mesh.material.opacity = alpha * puff.baseAlpha;
+                    
+                    // Creep radially outward along surface and swirl
+                    puff.curR += puff.speed;
+                    puff.angle += puff.swirl;
+                    puff.yOffset += puff.rise;
+                    
+                    const x = Math.cos(puff.angle) * puff.curR;
+                    const y = Math.sin(puff.angle) * puff.curR + puff.yOffset;
+                    const z = 0.035 - (x * x * 0.21);
+                    
+                    puff.mesh.position.set(x, y, z);
+                    
+                    // Expand scale smoothly as it billows outward
+                    const scaleMul = puff.baseScale * (1.0 + p * 2.2);
+                    puff.mesh.scale.set(scaleMul, scaleMul * 0.85, scaleMul);
+                    puff.mesh.rotation.z += puff.swirl * 1.5;
+                });
+
+                // Cleanup when complete
+                if (eff.progress >= 1.0) {
+                    if (eff.sword && eff.group) {
+                        eff.sword.remove(eff.group);
+                    }
+                    eff.puffs.forEach(puff => {
+                        if (puff.mesh.geometry) puff.mesh.geometry.dispose();
+                        if (puff.mesh.material) puff.mesh.material.dispose();
+                    });
+                    activeMistEffects.splice(i, 1);
                 }
             }
 
@@ -2381,6 +2538,18 @@
                 });
             });
             activeLightningEffects = [];
+
+            // Clear all active mist effects
+            activeMistEffects.forEach(eff => {
+                if (eff.sword && eff.group) {
+                    eff.sword.remove(eff.group);
+                }
+                eff.puffs.forEach(puff => {
+                    if (puff.mesh.geometry) puff.mesh.geometry.dispose();
+                    if (puff.mesh.material) puff.mesh.material.dispose();
+                });
+            });
+            activeMistEffects = [];
 
             // Detach and remove plugged sword meshes
             pluggedSwords.forEach(sw => {
