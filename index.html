@@ -378,22 +378,36 @@
             }
         };
 
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+        const isFirebaseConfigured = firebaseConfig && 
+            firebaseConfig.apiKey && 
+            !firebaseConfig.apiKey.includes('DummyKey') && 
+            firebaseConfig.projectId !== 'dummy-project';
 
-            const initAuth = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                currentUser = auth.currentUser;
-            };
-            initAuth().catch(err => console.log("Firebase Auth Fallback:", err));
-        } catch (e) {
-            console.warn("Firestore not available, running local mode.", e);
+        if (isFirebaseConfigured) {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    currentUser = auth.currentUser;
+                };
+                initAuth().catch(err => {
+                    console.warn("Firebase Auth Error:", err);
+                    currentUser = { uid: 'guest_' + Math.random().toString(36).substring(2, 9), displayName: 'Player' };
+                });
+            } catch (e) {
+                console.warn("Firestore not available, running in local fallback mode.", e);
+                currentUser = { uid: 'guest_' + Math.random().toString(36).substring(2, 9), displayName: 'Player' };
+            }
+        } else {
+            currentUser = { uid: 'guest_' + Math.random().toString(36).substring(2, 9), displayName: 'Player' };
+            console.log("ℹ️ Mode Lokal / Fallback Aktif (Firebase credentials tidak terpasang). Pass & Play siap dimainkan.");
         }
 
         // 3D Scene Global Variables
