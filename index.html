@@ -208,6 +208,9 @@
                     <button id="btn-start-online" class="w-full py-2.5 sm:py-3 rounded-xl gold-btn text-base sm:text-lg tracking-wide transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-dice"></i> Mulai Pertandingan
                     </button>
+                    <div id="lobby-wait-text" class="hidden w-full py-2.5 rounded-xl bg-amber-950/60 border border-amber-800/70 text-amber-300/90 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hourglass-half animate-pulse text-yellow-500"></i> Menunggu HOST memulai pertandingan...
+                    </div>
                 </div>
             </div>
         </div>
@@ -275,31 +278,70 @@
             <button id="btn-restart" class="w-full py-2.5 sm:py-3 rounded-xl gold-btn text-base sm:text-lg tracking-wide transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-rotate-right"></i> Main Ronde Berikutnya
             </button>
+            <div id="restart-wait-text" class="hidden w-full py-2.5 rounded-xl bg-amber-950/60 border border-amber-800/70 text-amber-300/90 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-hourglass-half animate-pulse text-yellow-500"></i> Menunggu HOST memulai ronde berikutnya...
+            </div>
         </div>
     </div>
 
     <!-- Application Script Logic -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Multiplayer Online Backend (PHP room API: ./api.php)
+        const API_URL = 'api.php';
 
-        // Environment Firebase Credentials
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pirate-barrel-3d-game';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDummyKeyForFallbackPurposeOnly",
-            authDomain: "dummy.firebaseapp.com",
-            projectId: "dummy-project",
-            storageBucket: "dummy.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
-
-        let app, auth, db;
-        let currentUser = null;
+        // Unique player id per browser tab (sessionStorage => each tab = different player)
+        let myUid = sessionStorage.getItem('pirate_uid');
+        if (!myUid) {
+            myUid = 'u_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+            sessionStorage.setItem('pirate_uid', myUid);
+        }
+        let currentUser = { uid: myUid };
         let currentRoomId = null;
         let isHost = false;
-        let roomUnsubscribe = null;
+
+        // Online sync state
+        let roomVersion = 0;
+        let onlineRound = -1;
+        let onlineStatus = null;
+        let pollTimer = null;
+        let pollInFlight = false;
+        let lastRotationSentAt = 0;
+        let lastRotationSentValue = null;
+        let rotationInFlight = false;
+        let insertInFlight = false;
+
+        async function apiCall(action, payload = {}) {
+            const res = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, uid: myUid, code: currentRoomId, ...payload }),
+                cache: 'no-store'
+            });
+            let data;
+            try { data = await res.json(); } catch (e) { throw new Error('Server tidak merespon dengan benar'); }
+            if (!res.ok || !data.ok) {
+                const err = new Error(data?.error || `HTTP ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            return data;
+        }
+
+        function showToast(message, type = 'error') {
+            let toast = document.getElementById('app-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'app-toast';
+                toast.style.cssText = 'position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:100;transition:opacity .3s;pointer-events:none;';
+                document.body.appendChild(toast);
+            }
+            const color = type === 'error' ? 'bg-red-950/95 border-red-500 text-red-200' : 'bg-emerald-950/95 border-emerald-500 text-emerald-200';
+            toast.className = `px-4 py-2 rounded-xl border text-xs sm:text-sm font-semibold shadow-2xl ${color}`;
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2600);
+        }
 
         // Web Audio Synthesizer
         const AudioFX = {
@@ -377,38 +419,6 @@
                 } catch(e) {}
             }
         };
-
-        const isFirebaseConfigured = firebaseConfig && 
-            firebaseConfig.apiKey && 
-            !firebaseConfig.apiKey.includes('DummyKey') && 
-            firebaseConfig.projectId !== 'dummy-project';
-
-        if (isFirebaseConfigured) {
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    currentUser = auth.currentUser;
-                };
-                initAuth().catch(err => {
-                    console.warn("Firebase Auth Error:", err);
-                    currentUser = { uid: 'guest_' + Math.random().toString(36).substring(2, 9), displayName: 'Player' };
-                });
-            } catch (e) {
-                console.warn("Firestore not available, running in local fallback mode.", e);
-                currentUser = { uid: 'guest_' + Math.random().toString(36).substring(2, 9), displayName: 'Player' };
-            }
-        } else {
-            currentUser = { uid: 'guest_' + Math.random().toString(36).substring(2, 9), displayName: 'Player' };
-            console.log("ℹ️ Mode Lokal / Fallback Aktif (Firebase credentials tidak terpasang). Pass & Play siap dimainkan.");
-        }
 
         // 3D Scene Global Variables
         let scene, camera, renderer;
@@ -963,13 +973,29 @@
             }
         }
 
+        function canSyncRotation() {
+            return gameState.mode === 'online' && currentRoomId && onlineStatus === 'playing' &&
+                   !gameState.isGameOver && isCurrentTurn();
+        }
+
+        // Called from the render loop: broadcasts drum rotation of the active player (throttled)
+        function maybeSyncRotation() {
+            if (!canSyncRotation() || rotationInFlight) return;
+            const now = performance.now();
+            if (now - lastRotationSentAt < 90) return;
+            if (lastRotationSentValue !== null && Math.abs(targetRotationY - lastRotationSentValue) < 0.002) return;
+
+            const angle = targetRotationY;
+            lastRotationSentAt = now;
+            lastRotationSentValue = angle;
+            rotationInFlight = true;
+            apiCall('rotate', { angle })
+                .catch(() => {})
+                .finally(() => { rotationInFlight = false; });
+        }
+
         function scheduleRoomRotationSync() {
-            if (gameState.mode !== 'online' || !currentRoomId || !isCurrentTurn()) return;
-            if (syncThrottleTimer) return;
-            syncThrottleTimer = setTimeout(() => {
-                syncThrottleTimer = null;
-                syncRoomRotation(targetRotationY);
-            }, 120);
+            maybeSyncRotation();
         }
 
         function setupInteractions() {
@@ -1075,7 +1101,7 @@
             if (gameState.insertedSlots.includes(numId)) return;
 
             if (gameState.mode === 'online') {
-                if (!isCurrentTurn()) return;
+                if (!isCurrentTurn() || insertInFlight || onlineStatus !== 'playing') return;
                 executeTurnOnline(numId);
             } else {
                 executeTurnLocal(numId);
@@ -1275,200 +1301,253 @@
             document.getElementById('gameover-modal').classList.remove('hidden');
         }
 
-        // Firebase Realtime Online Functions
+        // ===== Online Multiplayer (PHP Room API + fast polling) =====
+        function getPlayerName() {
+            return document.getElementById('player-name-input').value.trim() || 'Kapten Jack';
+        }
+
+        function enterRoomUI(code) {
+            document.getElementById('online-lobby-status').classList.remove('hidden');
+            document.getElementById('room-id-tag').textContent = `#${code}`;
+            document.getElementById('room-code-display').textContent = `Room: #${code}`;
+            document.getElementById('room-code-input').value = code;
+        }
+
+        function resetOnlineSyncState() {
+            roomVersion = 0;
+            onlineRound = -1;
+            onlineStatus = null;
+            lastRotationSentValue = null;
+            insertInFlight = false;
+        }
+
         async function createOnlineRoom() {
-            const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-            const playerName = document.getElementById('player-name-input').value.trim() || 'Kapten Jack';
-
-            currentRoomId = roomCode;
-            isHost = true;
-            gameState.mode = 'online';
-
-            if (!db || !currentUser) {
-                document.getElementById('room-id-tag').textContent = `#${roomCode}`;
-                document.getElementById('room-code-display').textContent = `Room: #${roomCode} (Lokal)`;
-                document.getElementById('online-lobby-status').classList.remove('hidden');
-                renderLobbyPlayers([{ id: 'p1', name: playerName }]);
-                return;
-            }
-
+            const btn = document.getElementById('btn-create-room');
+            btn.disabled = true;
             try {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
-                const initialRoomData = {
-                    code: roomCode,
-                    hostId: currentUser.uid,
-                    status: 'lobby',
-                    currentTurnIndex: 0,
-                    trapSlotId: Math.floor(Math.random() * slots.length),
-                    insertedSlots: [],
-                    rotationAngle: 0,
-                    players: [{ id: currentUser.uid, name: playerName, score: 0, swords: 0, wins: 0, losses: 0 }]
-                };
-
-                await setDoc(roomRef, initialRoomData);
-                listenToRoom(roomCode);
-
-                document.getElementById('online-lobby-status').classList.remove('hidden');
-                document.getElementById('room-id-tag').textContent = `#${roomCode}`;
-                document.getElementById('room-code-display').textContent = `Room: #${roomCode}`;
-            } catch(e) {
-                console.warn("Firebase createRoom error, fallback to local:", e);
-                document.getElementById('online-lobby-status').classList.remove('hidden');
+                await leaveCurrentRoom();
+                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, code: null });
+                currentRoomId = data.room.code;
+                gameState.mode = 'online';
+                resetOnlineSyncState();
+                enterRoomUI(currentRoomId);
+                applyRoomState(data.room);
+                startPolling();
+                showToast(`Room #${currentRoomId} dibuat. Bagikan kodenya!`, 'success');
+            } catch (e) {
+                showToast(`Gagal membuat room: ${e.message}`);
+            } finally {
+                btn.disabled = false;
             }
         }
 
         async function joinOnlineRoom() {
             const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
-            if (!roomCode) return;
-            const playerName = document.getElementById('player-name-input').value.trim() || 'Kapten Jack';
-
-            gameState.mode = 'online';
-            currentRoomId = roomCode;
-
-            if (!db || !currentUser) {
-                document.getElementById('online-lobby-status').classList.remove('hidden');
-                document.getElementById('room-id-tag').textContent = `#${roomCode}`;
-                document.getElementById('room-code-display').textContent = `Room: #${roomCode}`;
-                return;
-            }
-
+            if (!roomCode) { showToast('Masukkan kode room dulu'); return; }
+            const btn = document.getElementById('btn-join-room');
+            btn.disabled = true;
             try {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
-                const snap = await getDoc(roomRef);
-
-                if (!snap.exists()) {
-                    alert("Room tidak ditemukan!");
-                    return;
+                if (currentRoomId && currentRoomId !== roomCode) await leaveCurrentRoom();
+                const prevRoom = currentRoomId;
+                currentRoomId = roomCode;
+                try {
+                    const data = await apiCall('join', { name: getPlayerName() });
+                    gameState.mode = 'online';
+                    if (prevRoom !== roomCode) resetOnlineSyncState();
+                    enterRoomUI(roomCode);
+                    applyRoomState(data.room);
+                    startPolling();
+                    showToast(`Berhasil masuk room #${roomCode}`, 'success');
+                } catch (e) {
+                    currentRoomId = prevRoom;
+                    throw e;
                 }
-
-                const roomData = snap.data();
-                const players = roomData.players || [];
-
-                if (!players.find(p => p.id === currentUser.uid)) {
-                    players.push({ id: currentUser.uid, name: playerName, score: 0, swords: 0, wins: 0, losses: 0 });
-                    await updateDoc(roomRef, { players });
-                }
-
-                isHost = roomData.hostId === currentUser.uid;
-                listenToRoom(roomCode);
-
-                document.getElementById('online-lobby-status').classList.remove('hidden');
-                document.getElementById('room-id-tag').textContent = `#${roomCode}`;
-                document.getElementById('room-code-display').textContent = `Room: #${roomCode}`;
-            } catch(e) {
-                console.warn("Join room error:", e);
+            } catch (e) {
+                showToast(`Gagal join: ${e.message}`);
+            } finally {
+                btn.disabled = false;
             }
         }
 
-        function listenToRoom(roomCode) {
-            if (roomUnsubscribe) roomUnsubscribe();
-            if (!db) return;
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+        async function leaveCurrentRoom() {
+            stopPolling();
+            if (!currentRoomId) return;
+            const code = currentRoomId;
+            currentRoomId = null;
+            isHost = false;
+            resetOnlineSyncState();
+            try { await fetch(`${API_URL}?action=leave`, { method: 'POST', body: JSON.stringify({ action: 'leave', uid: myUid, code }) }); } catch (e) {}
+        }
 
-            roomUnsubscribe = onSnapshot(roomRef, (snapshot) => {
-                if (!snapshot.exists()) return;
-                const data = snapshot.data();
-
-                renderLobbyPlayers(data.players);
-                gameState.players = data.players;
-                updateScoreboardUI();
-
-                if (data.status === 'playing') {
-                    document.getElementById('room-modal').classList.add('hidden');
-                }
-
-                if (data.rotationAngle !== undefined && !isCurrentTurn()) {
-                    targetRotationY = data.rotationAngle;
-                }
-
-                if (data.insertedSlots) {
-                    data.insertedSlots.forEach((slotInfo) => {
-                        if (slots[slotInfo.slotId] && !slots[slotInfo.slotId].plugged) {
-                            plugSwordIntoSlot(slotInfo.slotId, slotInfo.color);
+        function startPolling() {
+            stopPolling();
+            const tick = async () => {
+                if (!currentRoomId) return;
+                if (!pollInFlight) {
+                    pollInFlight = true;
+                    try {
+                        const data = await apiCall('get', { v: roomVersion });
+                        if (!data.unchanged && data.room) applyRoomState(data.room);
+                    } catch (e) {
+                        if (e.status === 404 || e.status === 410) {
+                            showToast(e.message);
+                            await leaveCurrentRoom();
+                            document.getElementById('online-lobby-status').classList.add('hidden');
+                            document.getElementById('room-modal').classList.remove('hidden');
+                            return;
                         }
-                    });
+                    } finally {
+                        pollInFlight = false;
+                    }
+                }
+                // Faster polling while playing for smooth realtime drum sync
+                const delay = onlineStatus === 'playing' ? 120 : 700;
+                pollTimer = setTimeout(tick, delay);
+            };
+            tick();
+        }
+
+        function stopPolling() {
+            if (pollTimer) clearTimeout(pollTimer);
+            pollTimer = null;
+        }
+
+        /**
+         * Single source of truth: render everything from the server room snapshot.
+         */
+        function applyRoomState(room) {
+            if (!room || room.code !== currentRoomId) return;
+            // Ignore stale responses (e.g. a poll that started before our own insert)
+            if (room.version < roomVersion) return;
+            roomVersion = room.version;
+
+            isHost = room.hostId === myUid;
+            gameState.mode = 'online';
+            gameState.players = room.players;
+
+            renderLobbyPlayers(room.players, room.hostId);
+            updateHostOnlyControls(room);
+
+            const prevStatus = onlineStatus;
+            onlineStatus = room.status;
+
+            if (room.status === 'playing') {
+                // New round started (first start or host pressed restart)
+                if (room.round !== onlineRound) {
+                    onlineRound = room.round;
+                    resetGameSession();
+                    currentRotationY = targetRotationY = room.rotationAngle || 0;
+                    angularVelocity = 0;
+                    lastRotationSentValue = targetRotationY;
+                    document.getElementById('room-modal').classList.add('hidden');
+                    document.getElementById('gameover-modal').classList.add('hidden');
+                    if (prevStatus === 'lobby' || prevStatus === null) showToast('Pertandingan dimulai!', 'success');
                 }
 
-                gameState.currentTurnIndex = data.currentTurnIndex || 0;
-                updateTurnUI();
+                // Swords inserted by any player
+                const inserted = room.insertedSlots || [];
+                gameState.insertedSlots = inserted.map(s => Number(s.slotId));
+                inserted.forEach(s => {
+                    const slot = slots.find(x => x.id === Number(s.slotId));
+                    if (slot && !slot.plugged) {
+                        plugSwordIntoSlot(Number(s.slotId), PLAYER_COLORS[(s.playerIndex || 0) % PLAYER_COLORS.length]);
+                    }
+                });
 
-                if (data.isGameOver && !gameState.isGameOver) {
+                gameState.currentTurnIndex = room.currentTurnIndex || 0;
+
+                // Spectators follow the active player's drum rotation in realtime
+                if (!isCurrentTurn() && typeof room.rotationAngle === 'number') {
+                    targetRotationY = room.rotationAngle;
+                    angularVelocity = 0;
+                    isPointerDown = false;
+                }
+
+                if (room.isGameOver && !gameState.isGameOver) {
                     gameState.isGameOver = true;
                     triggerExplosionFX();
-                    const loser = data.players[data.loserIndex]?.name || 'Pemain';
-                    setTimeout(() => showGameOverModal(loser), 1200);
+                    const loserName = room.loserName || room.players[room.loserIndex]?.name || 'Pemain';
+                    setTimeout(() => showGameOverModal(loserName), 1200);
                 }
-            }, (err) => console.error("Room Sync Error:", err));
-        }
+            }
 
-        async function syncRoomRotation(angle) {
-            if (!currentRoomId || !db || !isCurrentTurn()) return;
-            try {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                await updateDoc(roomRef, { rotationAngle: angle });
-            } catch(e) {}
+            updateTurnUI();
+            updateScoreboardUI();
         }
 
         async function executeTurnOnline(slotId) {
-            if (!currentRoomId || !db) {
-                executeTurnLocal(slotId);
-                return;
-            }
-
+            if (!currentRoomId) return;
+            insertInFlight = true;
             try {
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                const snap = await getDoc(roomRef);
-                const data = snap.data();
-
-                const numericSlotId = Number(slotId);
-                const insertedSlots = data.insertedSlots || [];
-                const color = PLAYER_COLORS[data.currentTurnIndex % PLAYER_COLORS.length];
-                insertedSlots.push({ slotId: numericSlotId, color });
-
-                const updatedPlayers = [...data.players];
-                const activePlayer = updatedPlayers[data.currentTurnIndex];
-
-                const isTrap = (numericSlotId === Number(data.trapSlotId)) || 
-                               (insertedSlots.length >= slots.length);
-
-                if (isTrap) {
-                    activePlayer.losses += 1;
-
-                    await updateDoc(roomRef, {
-                        insertedSlots,
-                        players: updatedPlayers,
-                        isGameOver: true,
-                        loserIndex: data.currentTurnIndex
-                    });
-                } else {
-                    activePlayer.swords += 1;
-                    activePlayer.score += 1;
-                    const nextTurn = (data.currentTurnIndex + 1) % data.players.length;
-
-                    await updateDoc(roomRef, {
-                        insertedSlots,
-                        players: updatedPlayers,
-                        currentTurnIndex: nextTurn
-                    });
-                }
-            } catch(e) {
-                console.warn("executeTurnOnline fallback to local:", e);
-                executeTurnLocal(slotId);
+                const data = await apiCall('insert', { slotId: Number(slotId) });
+                applyRoomState(data.room);
+            } catch (e) {
+                showToast(e.message);
+            } finally {
+                insertInFlight = false;
             }
         }
 
-        function renderLobbyPlayers(playersList) {
+        function updateHostOnlyControls(room) {
+            const startBtn = document.getElementById('btn-start-online');
+            const waitText = document.getElementById('lobby-wait-text');
+            const restartBtn = document.getElementById('btn-restart');
+            const restartWait = document.getElementById('restart-wait-text');
+            const resetScoresBtn = document.getElementById('btn-reset-scores');
+            const online = gameState.mode === 'online' && currentRoomId;
+            const playerCount = room?.players?.length || 0;
+
+            if (startBtn && waitText) {
+                if (!online || isHost) {
+                    startBtn.classList.remove('hidden');
+                    waitText.classList.add('hidden');
+                    const notEnough = online && playerCount < 2;
+                    startBtn.disabled = notEnough;
+                    startBtn.classList.toggle('opacity-50', notEnough);
+                    startBtn.classList.toggle('cursor-not-allowed', notEnough);
+                    startBtn.innerHTML = notEnough
+                        ? `<i class="fa-solid fa-user-clock"></i> Menunggu Pemain Lain...`
+                        : (room?.status === 'playing'
+                            ? `<i class="fa-solid fa-dice"></i> Lanjutkan Pertandingan`
+                            : `<i class="fa-solid fa-dice"></i> Mulai Pertandingan`);
+                } else {
+                    startBtn.classList.add('hidden');
+                    waitText.classList.remove('hidden');
+                }
+            }
+
+            if (restartBtn && restartWait) {
+                const hideRestart = online && !isHost;
+                restartBtn.classList.toggle('hidden', hideRestart);
+                restartWait.classList.toggle('hidden', !hideRestart);
+            }
+
+            if (resetScoresBtn) {
+                resetScoresBtn.classList.toggle('hidden', !!(online && !isHost));
+            }
+        }
+
+        function renderLobbyPlayers(playersList, hostId) {
             const container = document.getElementById('players-list-container');
             if (!container) return;
-            container.innerHTML = playersList.map((p, i) => `
-                <div class="flex items-center justify-between p-1.5 bg-amber-950/40 border border-amber-900/40 rounded-lg text-xs">
+            container.innerHTML = (playersList || []).map((p, i) => {
+                const color = '#' + PLAYER_COLORS[i % PLAYER_COLORS.length].toString(16).padStart(6, '0');
+                const isPlayerHost = hostId ? p.id === hostId : i === 0;
+                const isMe = p.id === myUid;
+                return `
+                <div class="flex items-center justify-between p-1.5 bg-amber-950/40 border ${isMe ? 'border-yellow-600/70' : 'border-amber-900/40'} rounded-lg text-xs">
                     <span class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #${PLAYER_COLORS[i % PLAYER_COLORS.length].toString(16)}"></span>
-                        <span class="text-amber-200 font-semibold truncate max-w-[120px]">${p.name}</span>
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></span>
+                        <span class="text-amber-200 font-semibold truncate max-w-[120px]">${escapeHtml(p.name)}</span>
+                        ${isMe ? '<span class="text-[9px] text-amber-400/80">(Kamu)</span>' : ''}
                     </span>
-                    ${i === 0 ? '<span class="text-[9px] text-yellow-500 bg-yellow-950/80 px-1.5 py-0.5 rounded border border-yellow-700">Host</span>' : ''}
-                </div>
-            `).join('');
+                    ${isPlayerHost ? '<span class="text-[9px] text-yellow-500 bg-yellow-950/80 px-1.5 py-0.5 rounded border border-yellow-700">Host</span>' : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
         function setupUIEvents() {
@@ -1492,9 +1571,13 @@
                 document.getElementById('local-player-count-val').textContent = e.target.value;
             });
 
-            document.getElementById('btn-start-local').addEventListener('click', () => {
+            document.getElementById('btn-start-local').addEventListener('click', async () => {
                 const count = parseInt(localSlider.value);
+                await leaveCurrentRoom();
+                document.getElementById('online-lobby-status').classList.add('hidden');
+                document.getElementById('room-code-display').textContent = "Pass & Play (Lokal)";
                 gameState.mode = 'local';
+                updateHostOnlyControls(null);
                 gameState.players = Array.from({ length: count }, (_, i) => ({
                     id: `p${i + 1}`,
                     name: `Player ${i + 1}`,
@@ -1510,30 +1593,37 @@
             document.getElementById('btn-create-room').addEventListener('click', createOnlineRoom);
             document.getElementById('btn-join-room').addEventListener('click', joinOnlineRoom);
 
+            // HOST ONLY: start match (joiners never see this button; server also enforces it)
             document.getElementById('btn-start-online').addEventListener('click', async () => {
-                if (currentRoomId && db && isHost) {
-                    try {
-                        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                        await updateDoc(roomRef, { status: 'playing' });
-                    } catch(e) {}
+                if (!currentRoomId || !isHost) return;
+                if (onlineStatus === 'playing') {
+                    document.getElementById('room-modal').classList.add('hidden');
+                    return;
                 }
-                resetGameSession();
-                document.getElementById('room-modal').classList.add('hidden');
+                const btn = document.getElementById('btn-start-online');
+                btn.disabled = true;
+                try {
+                    const data = await apiCall('start');
+                    applyRoomState(data.room);
+                } catch (e) {
+                    showToast(e.message);
+                } finally {
+                    btn.disabled = false;
+                }
             });
 
-            document.getElementById('btn-restart').addEventListener('click', () => {
-                resetGameSession();
-                if (gameState.mode === 'online' && isHost && currentRoomId && db) {
+            document.getElementById('btn-restart').addEventListener('click', async () => {
+                if (gameState.mode === 'online') {
+                    if (!currentRoomId || !isHost) return;
                     try {
-                        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
-                        updateDoc(roomRef, {
-                            insertedSlots: [],
-                            isGameOver: false,
-                            trapSlotId: Math.floor(Math.random() * slots.length),
-                            currentTurnIndex: 0
-                        });
-                    } catch(e) {}
+                        const data = await apiCall('restart');
+                        applyRoomState(data.room);
+                    } catch (e) {
+                        showToast(e.message);
+                    }
+                    return;
                 }
+                resetGameSession();
             });
 
             // Scoreboard Modal Toggles
@@ -1546,7 +1636,17 @@
             });
 
             // Reset Scores Button
-            document.getElementById('btn-reset-scores').addEventListener('click', () => {
+            document.getElementById('btn-reset-scores').addEventListener('click', async () => {
+                if (gameState.mode === 'online' && currentRoomId) {
+                    if (!isHost) return;
+                    try {
+                        const data = await apiCall('resetScores');
+                        applyRoomState(data.room);
+                    } catch (e) {
+                        showToast(e.message);
+                    }
+                    return;
+                }
                 gameState.players.forEach(p => {
                     p.score = 0;
                     p.swords = 0;
@@ -1568,8 +1668,16 @@
         function animate() {
             requestAnimationFrame(animate);
             updatePhysicsAndParticles();
+            maybeSyncRotation();
             renderer.render(scene, camera);
         }
+
+        // Remove player from room when the tab is closed
+        window.addEventListener('pagehide', () => {
+            if (!currentRoomId) return;
+            const payload = JSON.stringify({ action: 'leave', uid: myUid, code: currentRoomId });
+            navigator.sendBeacon?.(`${API_URL}?action=leave`, new Blob([payload], { type: 'text/plain' }));
+        });
 
         window.onload = () => {
             init3D();
