@@ -100,8 +100,8 @@
             <button id="btn-toggle-scoreboard" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900 active:scale-95 text-yellow-400 border border-amber-700/80 flex items-center justify-center transition shadow" title="Papan Skor">
                 <i class="fa-solid fa-trophy text-sm sm:text-base"></i>
             </button>
-            <button id="btn-toggle-menu" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900 active:scale-95 text-yellow-400 border border-amber-700/80 flex items-center justify-center transition shadow" title="Room & Menu">
-                <i class="fa-solid fa-users text-sm sm:text-base"></i>
+            <button id="btn-toggle-menu" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900 active:scale-95 text-yellow-400 border border-amber-700/80 flex items-center justify-center transition shadow" title="Pengaturan & Room">
+                <i class="fa-solid fa-gear text-sm sm:text-base"></i>
             </button>
         </div>
     </header>
@@ -119,7 +119,7 @@
         <div class="wood-card rounded-2xl w-full max-w-sm sm:max-w-md p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-amber-900/60 pb-3 mb-3 sm:mb-4">
                 <h2 class="font-pirate text-2xl sm:text-3xl text-yellow-400 tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-anchor"></i> PIRATE LOBBY
+                    <i class="fa-solid fa-gear text-yellow-500"></i> PENGATURAN & LOBBY
                 </h2>
                 <button id="btn-close-modal" class="text-amber-400/60 hover:text-amber-200 text-xl hidden p-1">
                     <i class="fa-solid fa-xmark"></i>
@@ -128,11 +128,16 @@
 
             <!-- Player Profile Input -->
             <div class="mb-3.5">
-                <label class="block text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider mb-1.5">Nama Bajak Laut Kamu</label>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Nama Bajak Laut Kamu</label>
+                    <span id="player-name-lock-badge" class="text-[9px] text-amber-400/90 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800/70 hidden">
+                        <i class="fa-solid fa-lock text-[8px] mr-1"></i>Terkunci di Room
+                    </span>
+                </div>
                 <div class="relative">
                     <i class="fa-solid fa-user-ninja absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 text-sm"></i>
-                    <input type="text" id="player-name-input" placeholder="Kapten Jack" value="Captain Jack" 
-                        class="w-full pl-9 pr-3 py-2 sm:py-2.5 bg-amber-950/60 border border-amber-800 rounded-xl text-amber-100 placeholder-amber-800 text-sm focus:outline-none focus:border-yellow-500">
+                    <input type="text" id="player-name-input" placeholder="..." value="Jack" 
+                        class="w-full pl-9 pr-3 py-2 sm:py-2.5 bg-amber-950/60 border border-amber-800 rounded-xl text-amber-100 placeholder-amber-800 text-sm focus:outline-none focus:border-yellow-500 transition disabled:opacity-60 disabled:cursor-not-allowed">
                 </div>
             </div>
 
@@ -174,8 +179,46 @@
                 </div>
             </div>
 
+            <!-- Sword Skin Customization Selector -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Skin Pedang Kamu</label>
+                    <span id="sword-skin-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800/70">Cutlass</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5" id="sword-skin-container">
+                    <button type="button" data-skin="classic" class="sword-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
+                        <span class="text-xl flex-shrink-0">🗡️</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Cutlass Bajak Laut</p>
+                            <p class="text-[9px] text-amber-300/80 truncate">Baja & Gagang Kayu</p>
+                        </div>
+                    </button>
+                    <button type="button" data-skin="laser" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">⚡</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Plasma Saber</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Bilah Neon Plasma</p>
+                        </div>
+                    </button>
+                    <button type="button" data-skin="gold" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">👑</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Belati Emas</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Emas & Permata Ruby</p>
+                        </div>
+                    </button>
+                    <button type="button" data-skin="bone" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">💀</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Pedang Tulang</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Tengkorak Terkutuk</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
             <!-- Mode Tabs -->
-            <div class="grid grid-cols-2 gap-1.5 p-1 bg-amber-950/80 rounded-xl mb-4 border border-amber-900/60">
+            <div id="mode-tabs-container" class="grid grid-cols-2 gap-1.5 p-1 bg-amber-950/80 rounded-xl mb-4 border border-amber-900/60">
                 <button id="tab-pass-play" class="py-1.5 sm:py-2 text-xs font-bold rounded-lg text-yellow-300 bg-amber-900/80 border border-amber-700/60 shadow">
                     Pass & Play (Lokal)
                 </button>
@@ -200,31 +243,49 @@
 
             <!-- Online Section -->
             <div id="section-online" class="space-y-3.5 hidden">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div id="online-connect-box" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button id="btn-create-room" class="py-2 sm:py-2.5 px-3 bg-amber-900/60 hover:bg-amber-800 active:scale-95 border border-amber-700 rounded-xl text-amber-200 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-plus-circle text-yellow-400"></i> Buat Room
                     </button>
                     <div class="flex gap-1">
-                        <input type="text" id="room-code-input" placeholder="Kode Room" maxlength="5"
-                            class="w-full px-2.5 py-2 bg-amber-950/60 border border-amber-800 rounded-xl text-amber-100 placeholder-amber-800 text-xs sm:text-sm focus:outline-none uppercase">
+                        <input type="tel" inputmode="numeric" pattern="[0-9]*" id="room-code-input" placeholder="5 Digit Angka" maxlength="5"
+                            class="w-full px-2.5 py-2 bg-amber-950/60 border border-amber-800 rounded-xl text-amber-100 placeholder-amber-800 text-xs sm:text-sm focus:outline-none font-mono tracking-widest text-center">
                         <button id="btn-join-room" class="px-3 bg-yellow-600 hover:bg-yellow-500 active:scale-95 text-amber-950 font-bold rounded-xl text-xs sm:text-sm">
                             Join
                         </button>
                     </div>
                 </div>
 
-                <div id="online-lobby-status" class="hidden space-y-2.5 pt-2 border-t border-amber-900/50">
-                    <div class="flex justify-between items-center text-xs text-amber-300/80">
-                        <span>Pemain di Room:</span>
-                        <span id="room-id-tag" class="font-mono text-yellow-400 font-bold">#---</span>
+                <div id="online-lobby-status" class="hidden space-y-3 pt-2 border-t border-amber-900/50">
+                    <div class="flex justify-between items-center p-2 rounded-xl bg-amber-950/70 border border-amber-800/80">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-amber-300/80">Room:</span>
+                            <span id="room-id-tag" class="font-mono text-yellow-400 font-bold text-sm">#---</span>
+                        </div>
+                        <button id="btn-copy-code" type="button" class="px-2 py-1 rounded bg-amber-900/80 hover:bg-amber-800 text-[10px] text-yellow-300 font-semibold border border-amber-700/60 flex items-center gap-1 active:scale-95 transition">
+                            <i class="fa-solid fa-copy"></i> Salin Kode
+                        </button>
                     </div>
-                    <div id="players-list-container" class="space-y-1 max-h-32 overflow-y-auto pr-1"></div>
+
+                    <div>
+                        <div class="flex justify-between items-center text-xs text-amber-300/80 mb-1.5">
+                            <span>Daftar Pemain di Room:</span>
+                            <span id="room-role-indicator" class="text-[10px] font-semibold text-yellow-400"></span>
+                        </div>
+                        <div id="players-list-container" class="space-y-1 max-h-36 overflow-y-auto pr-1"></div>
+                    </div>
+
                     <button id="btn-start-online" class="w-full py-2.5 sm:py-3 rounded-xl gold-btn text-base sm:text-lg tracking-wide transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-dice"></i> Mulai Pertandingan
                     </button>
                     <div id="lobby-wait-text" class="hidden w-full py-2.5 rounded-xl bg-amber-950/60 border border-amber-800/70 text-amber-300/90 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
                         <i class="fa-solid fa-hourglass-half animate-pulse text-yellow-500"></i> Menunggu HOST memulai pertandingan...
                     </div>
+
+                    <!-- Tombol Keluar dari Room (Leave Room) -->
+                    <button id="btn-leave-room" type="button" class="w-full py-2.5 px-3 rounded-xl bg-red-950/80 hover:bg-red-900 active:scale-95 text-red-300 hover:text-red-100 border border-red-800/80 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition shadow">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar dari Room
+                    </button>
                 </div>
             </div>
         </div>
@@ -388,6 +449,24 @@
                     osc.stop(this.ctx.currentTime + 0.09);
                 } catch(e) {}
             },
+            playPlasmaZap() {
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(1600, now);
+                    osc.frequency.exponentialRampToValueAtTime(240, now + 0.18);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(now + 0.18);
+                } catch(e) {}
+            },
             playExplode() {
                 try {
                     this.init();
@@ -442,6 +521,7 @@
         let pluggedSwords = [];
         let particles = [];
         let woodenShards = [];
+        let activeLightningEffects = [];
         let cameraShakeIntensity = 0;
         let headAnimFrame = null;
 
@@ -459,6 +539,7 @@
         let syncThrottleTimer = null;
 
         let selectedTopDesign = 'lid';
+        let selectedSwordSkin = localStorage.getItem('pirate_sword_skin') || 'classic';
         let pirateEmotionRefs = {};
         let emotionAnimState = {
             jolt: 0,
@@ -1279,29 +1360,228 @@
             console.log(`✅ ${slots.length} Circular Keyhole Slots generated with consistent radii.`);
         }
 
-        function createSword3D(colorHex) {
+        function generateLightningBranchData(baseAngle, length, segments = 8) {
+            const rawPoints = [];
+            const angleSpread = (Math.random() - 0.5) * 0.35;
+            const finalAngle = baseAngle + angleSpread;
+            
+            for (let i = 0; i <= segments; i++) {
+                const frac = i / segments;
+                // Start from keyhole collar (r ~ 0.14) outward across barrel face
+                const r = 0.14 + (length * frac);
+                const dev = (i === 0 || i === segments) ? 0 : (Math.random() - 0.5) * 0.14;
+                const curAngle = finalAngle + dev;
+                const x = Math.cos(curAngle) * r;
+                const y = Math.sin(curAngle) * r;
+                // Barrel surface cylindrical curvature offset
+                const z = 0.032 - (x * x * 0.21);
+                rawPoints.push({ x, y, z, r, curAngle });
+            }
+            return rawPoints;
+        }
+
+        function createJaggedArcPositions(radius = 0.22, segments = 5) {
+            const points = [];
+            const baseAngle = Math.random() * Math.PI * 2;
+            const arcSpan = (Math.PI * 2 / 3) * (0.6 + Math.random() * 0.8);
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const angle = baseAngle + (t * arcSpan);
+                const r = radius + (Math.random() - 0.5) * 0.06;
+                const x = Math.cos(angle) * r;
+                const y = Math.sin(angle) * r;
+                const z = 0.032 - (x * x * 0.21);
+                points.push(x, y, z);
+            }
+            return new Float32Array(points);
+        }
+
+        function createSword3D(colorHex, skinType = 'classic') {
             const swordGroup = new THREE.Group();
+            const skin = ['classic', 'laser', 'gold', 'bone'].includes(skinType) ? skinType : 'classic';
 
-            const bladeGeo = new THREE.BoxGeometry(0.1, 1.4, 0.03);
-            const bladeMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 });
-            const blade = new THREE.Mesh(bladeGeo, bladeMat);
-            blade.position.z = -0.7;
-            blade.rotation.x = Math.PI / 2;
-            blade.castShadow = true;
-            swordGroup.add(blade);
+            if (skin === 'laser') {
+                // =========================================================================
+                // 1. PLASMA SABER (Futuristic Glowing Energy Beam & Cybernetic Hilt)
+                // =========================================================================
+                const cyberMat = new THREE.MeshStandardMaterial({
+                    color: 0x1e293b,
+                    metalness: 0.95,
+                    roughness: 0.22
+                });
+                const neonBladeMat = new THREE.MeshBasicMaterial({
+                    color: colorHex
+                });
+                const whiteCoreMat = new THREE.MeshBasicMaterial({
+                    color: 0xffffff
+                });
 
-            const guardGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.05, 12);
-            const guardMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.5, roughness: 0.4 });
-            const guard = new THREE.Mesh(guardGeo, guardMat);
-            guard.position.z = 0.05;
-            swordGroup.add(guard);
+                // Outer Glowing Plasma Beam Blade
+                const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1.4, 16), neonBladeMat);
+                beam.position.z = -0.7;
+                beam.rotation.x = Math.PI / 2;
+                swordGroup.add(beam);
 
-            const gripGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.4, 8);
-            const gripMat = new THREE.MeshStandardMaterial({ color: 0x2b1d0c });
-            const grip = new THREE.Mesh(gripGeo, gripMat);
-            grip.rotation.x = Math.PI / 2;
-            grip.position.z = 0.25;
-            swordGroup.add(grip);
+                // Inner Incandescent White Core
+                const coreBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.36, 12), whiteCoreMat);
+                coreBeam.position.z = -0.7;
+                coreBeam.rotation.x = Math.PI / 2;
+                swordGroup.add(coreBeam);
+
+                // Cyber Emitter Collar Guard
+                const emitter = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.09, 0.16, 16), cyberMat);
+                emitter.position.z = 0.05;
+                emitter.rotation.x = Math.PI / 2;
+                swordGroup.add(emitter);
+
+                // Emissive Energy Conduit Ring
+                const ringEmitter = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.02, 8, 16), neonBladeMat);
+                ringEmitter.position.z = 0.08;
+                swordGroup.add(ringEmitter);
+
+                // Ribbed Cyber Handle
+                const cyberGrip = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.068, 0.38, 12), cyberMat);
+                cyberGrip.position.z = 0.28;
+                cyberGrip.rotation.x = Math.PI / 2;
+                swordGroup.add(cyberGrip);
+
+                // Power Cell Pommel
+                const pommel = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 12), neonBladeMat);
+                pommel.position.z = 0.48;
+                swordGroup.add(pommel);
+
+            } else if (skin === 'gold') {
+                // =========================================================================
+                // 2. ROYAL GOLD DAGGER (Polished Gold Blade, Ruby Crossguard & Velvet Handle)
+                // =========================================================================
+                const goldMat = new THREE.MeshStandardMaterial({
+                    color: 0xffd700,
+                    metalness: 0.95,
+                    roughness: 0.15
+                });
+                const rubyMat = new THREE.MeshStandardMaterial({
+                    color: 0xdc2626,
+                    emissive: 0x991b1b,
+                    emissiveIntensity: 1.5,
+                    roughness: 0.1
+                });
+                const velvetMat = new THREE.MeshStandardMaterial({
+                    color: colorHex,
+                    roughness: 0.75,
+                    metalness: 0.1
+                });
+
+                // Double-Edged Gold Blade
+                const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.4, 0.035), goldMat);
+                blade.position.z = -0.7;
+                blade.rotation.x = Math.PI / 2;
+                blade.castShadow = true;
+                swordGroup.add(blade);
+
+                // Winged Golden Crossguard
+                const guardWing = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.075, 0.075), goldMat);
+                guardWing.position.z = 0.04;
+                swordGroup.add(guardWing);
+
+                // Central Embedded Ruby Jewel
+                const ruby = new THREE.Mesh(new THREE.OctahedronGeometry(0.07), rubyMat);
+                ruby.position.z = 0.04;
+                swordGroup.add(ruby);
+
+                // Velvet Grip with Player Color
+                const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.36, 12), velvetMat);
+                grip.position.z = 0.25;
+                grip.rotation.x = Math.PI / 2;
+                swordGroup.add(grip);
+
+                // Royal Crown Pommel
+                const crownPommel = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.06, 0.09, 8), goldMat);
+                crownPommel.position.z = 0.45;
+                crownPommel.rotation.x = Math.PI / 2;
+                swordGroup.add(crownPommel);
+
+            } else if (skin === 'bone') {
+                // =========================================================================
+                // 3. CURSED BONE BLADE (Jagged Skeletal Ivory & Spectral Medallion)
+                // =========================================================================
+                const boneMat = new THREE.MeshStandardMaterial({
+                    color: 0xfef08a,
+                    roughness: 0.65,
+                    metalness: 0.05
+                });
+                const spectralMat = new THREE.MeshBasicMaterial({
+                    color: 0x22c55e
+                });
+                const darkWrapMat = new THREE.MeshStandardMaterial({
+                    color: 0x27272a,
+                    roughness: 0.9
+                });
+
+                // Jagged Ivory Blade
+                const blade = new THREE.Mesh(new THREE.BoxGeometry(0.11, 1.38, 0.045), boneMat);
+                blade.position.z = -0.7;
+                blade.rotation.x = Math.PI / 2;
+                blade.castShadow = true;
+                swordGroup.add(blade);
+
+                // Vertebrae Guard with Player Color Accent
+                const guard = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.08, 6), new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.3, roughness: 0.6 }));
+                guard.position.z = 0.04;
+                swordGroup.add(guard);
+
+                // Mini Skull Center
+                const miniSkull = new THREE.Mesh(new THREE.SphereGeometry(0.085, 10, 10), boneMat);
+                miniSkull.position.z = 0.08;
+                swordGroup.add(miniSkull);
+
+                // Glowing Green Spectral Eye
+                const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), spectralMat);
+                eye.position.set(0, 0.035, 0.15);
+                swordGroup.add(eye);
+
+                // Bandaged Handle
+                const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.38, 8), darkWrapMat);
+                grip.position.z = 0.28;
+                grip.rotation.x = Math.PI / 2;
+                swordGroup.add(grip);
+
+                // Horn Bone Pommel
+                const pommel = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.14, 6), boneMat);
+                pommel.position.z = 0.5;
+                pommel.rotation.x = Math.PI / 2;
+                swordGroup.add(pommel);
+
+            } else {
+                // =========================================================================
+                // 4. CLASSIC PIRATE CUTLASS (Steel Blade, Brass Knuckle Guard & Wood Grip)
+                // =========================================================================
+                const bladeGeo = new THREE.BoxGeometry(0.1, 1.4, 0.03);
+                const bladeMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.92, roughness: 0.2 });
+                const blade = new THREE.Mesh(bladeGeo, bladeMat);
+                blade.position.z = -0.7;
+                blade.rotation.x = Math.PI / 2;
+                blade.castShadow = true;
+                swordGroup.add(blade);
+
+                const guardGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.05, 12);
+                const guardMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.5, roughness: 0.4 });
+                const guard = new THREE.Mesh(guardGeo, guardMat);
+                guard.position.z = 0.05;
+                swordGroup.add(guard);
+
+                const gripGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.4, 8);
+                const gripMat = new THREE.MeshStandardMaterial({ color: 0x2b1d0c });
+                const grip = new THREE.Mesh(gripGeo, gripMat);
+                grip.rotation.x = Math.PI / 2;
+                grip.position.z = 0.25;
+                swordGroup.add(grip);
+
+                const pommelGeo = new THREE.SphereGeometry(0.08, 10, 10);
+                const pommelMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.8, roughness: 0.3 });
+                const pommel = new THREE.Mesh(pommelGeo, pommelMat);
+                pommel.position.z = 0.46;
+                swordGroup.add(pommel);
+            }
 
             return swordGroup;
         }
@@ -1318,12 +1598,107 @@
             }
         }
 
-        function plugSwordIntoSlot(slotId, colorHex = 0xff4444) {
+        function spawnPlasmaCrawlingLightning(sword, colorHex) {
+            AudioFX.playPlasmaZap();
+
+            const lightningGroup = new THREE.Group();
+            lightningGroup.position.set(0, 0, 0); // At keyhole surface in sword coordinates
+            sword.add(lightningGroup);
+
+            // High-voltage point light at keyhole
+            const electricLight = new THREE.PointLight(colorHex, 3.5, 3.2, 2.0);
+            electricLight.position.set(0, 0, 0.08);
+            lightningGroup.add(electricLight);
+
+            const branches = [];
+            const numBranches = 10;
+            
+            for (let i = 0; i < numBranches; i++) {
+                const baseAngle = (i / numBranches) * Math.PI * 2 + (Math.random() - 0.5) * 0.35;
+                const branchLength = 0.45 + Math.random() * 0.48; // 0.45 to 0.93 units outwards
+                const pointsData = generateLightningBranchData(baseAngle, branchLength, 8);
+
+                // Main neon colored bolt
+                const geo = new THREE.BufferGeometry();
+                const initialPos = new Float32Array([pointsData[0].x, pointsData[0].y, pointsData[0].z, pointsData[0].x, pointsData[0].y, pointsData[0].z]);
+                geo.setAttribute('position', new THREE.BufferAttribute(initialPos, 3));
+                
+                const mat = new THREE.LineBasicMaterial({
+                    color: Math.random() > 0.35 ? colorHex : 0x38bdf8,
+                    transparent: true,
+                    opacity: 1.0,
+                    depthWrite: false
+                });
+                const line = new THREE.Line(geo, mat);
+                lightningGroup.add(line);
+
+                // Core incandescent white hot bolt
+                const coreGeo = new THREE.BufferGeometry();
+                coreGeo.setAttribute('position', new THREE.BufferAttribute(initialPos.slice(), 3));
+                const coreMat = new THREE.LineBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 1.0,
+                    depthWrite: false
+                });
+                const coreLine = new THREE.Line(coreGeo, coreMat);
+                lightningGroup.add(coreLine);
+
+                // Optional forked sub-branch
+                let forkLine = null;
+                let forkPointsData = null;
+                if (Math.random() < 0.65) {
+                    const forkAngle = baseAngle + (Math.random() > 0.5 ? 0.55 : -0.55);
+                    forkPointsData = generateLightningBranchData(forkAngle, branchLength * 0.6, 5);
+                    const forkGeo = new THREE.BufferGeometry();
+                    forkGeo.setAttribute('position', new THREE.BufferAttribute(initialPos.slice(), 3));
+                    forkLine = new THREE.Line(forkGeo, mat.clone());
+                    lightningGroup.add(forkLine);
+                }
+
+                branches.push({
+                    line,
+                    coreLine,
+                    forkLine,
+                    pointsData,
+                    forkPointsData,
+                    mat,
+                    coreMat
+                });
+            }
+
+            // Jagged ring arcs hugging keyhole collar
+            const ringArcs = [];
+            for (let k = 0; k < 3; k++) {
+                const ringGeo = new THREE.BufferGeometry();
+                const ringMat = new THREE.LineBasicMaterial({
+                    color: Math.random() > 0.5 ? 0xffffff : colorHex,
+                    transparent: true,
+                    opacity: 1.0,
+                    depthWrite: false
+                });
+                const ringLine = new THREE.Line(ringGeo, ringMat);
+                lightningGroup.add(ringLine);
+                ringArcs.push({ line: ringLine, mat: ringMat, baseR: 0.16 + k * 0.05 });
+            }
+
+            activeLightningEffects.push({
+                group: lightningGroup,
+                sword: sword,
+                light: electricLight,
+                colorHex: colorHex,
+                branches: branches,
+                ringArcs: ringArcs,
+                progress: 0.0
+            });
+        }
+
+        function plugSwordIntoSlot(slotId, colorHex = 0xff4444, skinType = 'classic') {
             const slot = slots.find(s => s.id === slotId);
             if (!slot || slot.plugged) return;
 
             slot.plugged = true;
-            const sword = createSword3D(colorHex);
+            const sword = createSword3D(colorHex, skinType);
 
             const x = Math.sin(slot.angle) * slot.radius;
             const z = Math.cos(slot.angle) * slot.radius;
@@ -1341,7 +1716,12 @@
             intactBarrelGroup.add(sword);
             pluggedSwords.push(sword);
 
-            AudioFX.playInsert();
+            if (skinType === 'laser') {
+                spawnPlasmaCrawlingLightning(sword, colorHex);
+            } else {
+                AudioFX.playInsert();
+            }
+
             triggerPirateFlinch();
         }
 
@@ -1562,6 +1942,106 @@
                 }
             }
 
+            // Animate Plasma Saber Crawling & Fading Lightning Effects
+            for (let i = activeLightningEffects.length - 1; i >= 0; i--) {
+                const eff = activeLightningEffects[i];
+                eff.progress += 0.022; // ~45 frames duration (~0.75-0.9s)
+
+                const p = eff.progress;
+                // Crawl propagation (0.0 to 0.40): branches spread outward from keyhole collar
+                const crawlFrac = Math.min(1.0, p / 0.40);
+
+                // Fade out (0.45 to 1.0): smooth dramatic fade out of opacity and illumination
+                let alpha = 1.0;
+                if (p > 0.45) {
+                    alpha = Math.max(0.0, 1.0 - (p - 0.45) / 0.55);
+                }
+
+                // Realistic high-frequency electrical flicker
+                const flicker = Math.random() > 0.1 ? (0.75 + Math.random() * 0.25) : 0.2;
+                const finalAlpha = alpha * flicker;
+
+                if (eff.light) {
+                    eff.light.intensity = alpha * (2.0 + Math.random() * 2.2);
+                }
+
+                // Update branching lightning paths
+                eff.branches.forEach(b => {
+                    b.mat.opacity = finalAlpha;
+                    b.coreMat.opacity = finalAlpha;
+
+                    const totalPts = b.pointsData.length;
+                    const visiblePtsCount = Math.max(2, Math.floor(crawlFrac * totalPts));
+                    const flatPoints = [];
+
+                    for (let ptIdx = 0; ptIdx < visiblePtsCount; ptIdx++) {
+                        const pt = b.pointsData[ptIdx];
+                        // Electric high-frequency jitter on live nodes (except fixed root at hole)
+                        const jitX = (Math.random() - 0.5) * 0.035 * (ptIdx === 0 ? 0 : 1);
+                        const jitY = (Math.random() - 0.5) * 0.035 * (ptIdx === 0 ? 0 : 1);
+                        const x = pt.x + jitX;
+                        const y = pt.y + jitY;
+                        const z = 0.032 - (x * x * 0.21);
+                        flatPoints.push(x, y, z);
+                    }
+
+                    if (b.line.geometry) b.line.geometry.dispose();
+                    b.line.geometry = new THREE.BufferGeometry();
+                    b.line.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(flatPoints), 3));
+
+                    if (b.coreLine.geometry) b.coreLine.geometry.dispose();
+                    b.coreLine.geometry = new THREE.BufferGeometry();
+                    b.coreLine.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(flatPoints), 3));
+
+                    if (b.forkLine && b.forkPointsData && visiblePtsCount >= 3) {
+                        b.forkLine.material.opacity = finalAlpha * 0.85;
+                        const forkVisCount = Math.max(2, Math.floor(crawlFrac * b.forkPointsData.length));
+                        const forkFlat = [];
+                        for (let fIdx = 0; fIdx < forkVisCount; fIdx++) {
+                            const fpt = b.forkPointsData[fIdx];
+                            const x = fpt.x + (Math.random() - 0.5) * 0.03;
+                            const y = fpt.y + (Math.random() - 0.5) * 0.03;
+                            const z = 0.032 - (x * x * 0.21);
+                            forkFlat.push(x, y, z);
+                        }
+                        if (b.forkLine.geometry) b.forkLine.geometry.dispose();
+                        b.forkLine.geometry = new THREE.BufferGeometry();
+                        b.forkLine.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(forkFlat), 3));
+                    }
+                });
+
+                // Update circular ring arcs around hole
+                eff.ringArcs.forEach(ra => {
+                    ra.mat.opacity = finalAlpha;
+                    const ringPositions = createJaggedArcPositions(ra.baseR, 5);
+                    if (ra.line.geometry) ra.line.geometry.dispose();
+                    ra.line.geometry = new THREE.BufferGeometry();
+                    ra.line.geometry.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
+                });
+
+                // Cleanup when complete
+                if (eff.progress >= 1.0) {
+                    if (eff.sword && eff.group) {
+                        eff.sword.remove(eff.group);
+                    }
+                    eff.branches.forEach(b => {
+                        if (b.line.geometry) b.line.geometry.dispose();
+                        if (b.line.material) b.line.material.dispose();
+                        if (b.coreLine.geometry) b.coreLine.geometry.dispose();
+                        if (b.coreLine.material) b.coreLine.material.dispose();
+                        if (b.forkLine) {
+                            if (b.forkLine.geometry) b.forkLine.geometry.dispose();
+                            if (b.forkLine.material) b.forkLine.material.dispose();
+                        }
+                    });
+                    eff.ringArcs.forEach(ra => {
+                        if (ra.line.geometry) ra.line.geometry.dispose();
+                        if (ra.line.material) ra.line.material.dispose();
+                    });
+                    activeLightningEffects.splice(i, 1);
+                }
+            }
+
             // Animate particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
@@ -1570,6 +2050,7 @@
                 p.scale.multiplyScalar(0.93);
 
                 if (p.scale.x < 0.01) {
+                    if (p.parent) p.parent.remove(p);
                     scene.remove(p);
                     particles.splice(i, 1);
                 }
@@ -1737,7 +2218,7 @@
             const currentPlayer = gameState.players[gameState.currentTurnIndex];
             const playerColor = PLAYER_COLORS[gameState.currentTurnIndex % PLAYER_COLORS.length];
 
-            plugSwordIntoSlot(numericSlotId, playerColor);
+            plugSwordIntoSlot(numericSlotId, playerColor, selectedSwordSkin);
 
             // Trap check: Explodes immediately when the randomly chosen trap slot is hit!
             const isTrap = (numericSlotId === Number(gameState.trapSlotId)) || 
@@ -1873,8 +2354,33 @@
             woodenShards = [];
 
             // Remove particles
-            particles.forEach(p => scene.remove(p));
+            particles.forEach(p => {
+                if (p.parent) p.parent.remove(p);
+                scene.remove(p);
+            });
             particles = [];
+
+            // Clear all active lightning effects
+            activeLightningEffects.forEach(eff => {
+                if (eff.sword && eff.group) {
+                    eff.sword.remove(eff.group);
+                }
+                eff.branches.forEach(b => {
+                    if (b.line && b.line.geometry) b.line.geometry.dispose();
+                    if (b.line && b.line.material) b.line.material.dispose();
+                    if (b.coreLine && b.coreLine.geometry) b.coreLine.geometry.dispose();
+                    if (b.coreLine && b.coreLine.material) b.coreLine.material.dispose();
+                    if (b.forkLine) {
+                        if (b.forkLine.geometry) b.forkLine.geometry.dispose();
+                        if (b.forkLine.material) b.forkLine.material.dispose();
+                    }
+                });
+                eff.ringArcs.forEach(ra => {
+                    if (ra.line && ra.line.geometry) ra.line.geometry.dispose();
+                    if (ra.line && ra.line.material) ra.line.material.dispose();
+                });
+            });
+            activeLightningEffects = [];
 
             // Detach and remove plugged sword meshes
             pluggedSwords.forEach(sw => {
@@ -1927,10 +2433,10 @@
         }
 
         function enterRoomUI(code) {
-            document.getElementById('online-lobby-status').classList.remove('hidden');
             document.getElementById('room-id-tag').textContent = `#${code}`;
             document.getElementById('room-code-display').textContent = `Room: #${code}`;
             document.getElementById('room-code-input').value = code;
+            updateRoomModalState();
         }
 
         function resetOnlineSyncState() {
@@ -1941,14 +2447,90 @@
             insertInFlight = false;
         }
 
+        function updateSwordSkinUI(activeSkin) {
+            const skinNames = {
+                classic: 'Cutlass',
+                laser: 'Plasma Saber',
+                gold: 'Belati Emas',
+                bone: 'Pedang Tulang'
+            };
+            const badge = document.getElementById('sword-skin-badge');
+            if (badge) {
+                badge.textContent = skinNames[activeSkin] || 'Cutlass';
+            }
+
+            document.querySelectorAll('.sword-skin-btn').forEach(btn => {
+                const skin = btn.getAttribute('data-skin');
+                const isSelected = skin === activeSkin;
+                if (isSelected) {
+                    btn.className = "sword-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02]";
+                    const title = btn.querySelector('p');
+                    if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
+                } else {
+                    btn.className = "sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 opacity-80";
+                    const title = btn.querySelector('p');
+                    if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
+                }
+            });
+        }
+
+        function updateRoomModalState() {
+            const isOnlineRoom = gameState.mode === 'online' && !!currentRoomId;
+            const nameInput = document.getElementById('player-name-input');
+            const nameLockBadge = document.getElementById('player-name-lock-badge');
+            const modeTabsContainer = document.getElementById('mode-tabs-container');
+            const connectBox = document.getElementById('online-connect-box');
+            const lobbyStatus = document.getElementById('online-lobby-status');
+            const sectionPassPlay = document.getElementById('section-pass-play');
+            const sectionOnline = document.getElementById('section-online');
+            const roleIndicator = document.getElementById('room-role-indicator');
+            const closeModalBtn = document.getElementById('btn-close-modal');
+
+            updateSwordSkinUI(selectedSwordSkin);
+
+            if (isOnlineRoom) {
+                // Lock player name during active room session
+                if (nameInput) nameInput.disabled = true;
+                if (nameLockBadge) nameLockBadge.classList.remove('hidden');
+
+                // Hide mode switcher & connect box
+                if (modeTabsContainer) modeTabsContainer.classList.add('hidden');
+                if (sectionPassPlay) sectionPassPlay.classList.add('hidden');
+                if (sectionOnline) sectionOnline.classList.remove('hidden');
+                if (connectBox) connectBox.classList.add('hidden');
+                if (lobbyStatus) lobbyStatus.classList.remove('hidden');
+                if (closeModalBtn) closeModalBtn.classList.remove('hidden');
+
+                if (roleIndicator) {
+                    roleIndicator.innerHTML = isHost 
+                        ? `<span class="text-yellow-400 font-bold bg-yellow-950/80 px-2 py-0.5 rounded border border-yellow-700/80">👑 Kamu adalah HOST</span>` 
+                        : `<span class="text-amber-300 font-semibold bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/80">⚓ Kamu Joiner</span>`;
+                }
+
+                updateTopDesignUI(selectedTopDesign, isHost);
+            } else {
+                // Local mode or outside of room
+                if (nameInput) nameInput.disabled = false;
+                if (nameLockBadge) nameLockBadge.classList.add('hidden');
+
+                if (modeTabsContainer) modeTabsContainer.classList.remove('hidden');
+                if (connectBox) connectBox.classList.remove('hidden');
+                if (lobbyStatus) lobbyStatus.classList.add('hidden');
+                if (roleIndicator) roleIndicator.textContent = '';
+
+                updateTopDesignUI(selectedTopDesign, true);
+            }
+        }
+
         async function createOnlineRoom() {
             const btn = document.getElementById('btn-create-room');
             btn.disabled = true;
             try {
                 await leaveCurrentRoom();
-                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, topDesign: selectedTopDesign, code: null });
+                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, topDesign: selectedTopDesign, swordSkin: selectedSwordSkin, code: null });
                 currentRoomId = data.room.code;
                 gameState.mode = 'online';
+                isHost = true;
                 resetOnlineSyncState();
                 enterRoomUI(currentRoomId);
                 applyRoomState(data.room);
@@ -1962,8 +2544,8 @@
         }
 
         async function joinOnlineRoom() {
-            const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
-            if (!roomCode) { showToast('Masukkan kode room dulu'); return; }
+            const roomCode = document.getElementById('room-code-input').value.replace(/[^0-9]/g, '');
+            if (!roomCode) { showToast('Masukkan 5 digit kode angka room'); return; }
             const btn = document.getElementById('btn-join-room');
             btn.disabled = true;
             try {
@@ -1971,8 +2553,9 @@
                 const prevRoom = currentRoomId;
                 currentRoomId = roomCode;
                 try {
-                    const data = await apiCall('join', { name: getPlayerName() });
+                    const data = await apiCall('join', { name: getPlayerName(), swordSkin: selectedSwordSkin });
                     gameState.mode = 'online';
+                    isHost = data.room.hostId === myUid;
                     if (prevRoom !== roomCode) resetOnlineSyncState();
                     enterRoomUI(roomCode);
                     applyRoomState(data.room);
@@ -1996,6 +2579,7 @@
             currentRoomId = null;
             isHost = false;
             resetOnlineSyncState();
+            updateRoomModalState();
             try { await fetch(`${API_URL}?action=leave`, { method: 'POST', body: JSON.stringify({ action: 'leave', uid: myUid, code }) }); } catch (e) {}
         }
 
@@ -2012,7 +2596,6 @@
                         if (e.status === 404 || e.status === 410) {
                             showToast(e.message);
                             await leaveCurrentRoom();
-                            document.getElementById('online-lobby-status').classList.add('hidden');
                             document.getElementById('room-modal').classList.remove('hidden');
                             return;
                         }
@@ -2033,23 +2616,34 @@
         }
 
         function updateTopDesignUI(activeDesign, isHostUser) {
+            const isOnline = gameState.mode === 'online' && !!currentRoomId;
             const hostBadge = document.getElementById('design-host-badge');
             if (hostBadge) {
-                hostBadge.classList.toggle('hidden', !(gameState.mode === 'online' && !isHostUser));
-                if (gameState.mode === 'online' && !isHostUser) {
-                    hostBadge.textContent = 'Dipilih Host';
+                if (isOnline) {
+                    hostBadge.classList.remove('hidden');
+                    if (isHostUser) {
+                        hostBadge.className = "text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-yellow-600/70";
+                        hostBadge.innerHTML = '<i class="fa-solid fa-crown text-[8px] mr-1"></i>Host Setup';
+                    } else {
+                        hostBadge.className = "text-[9px] text-amber-400/80 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800/70";
+                        hostBadge.innerHTML = '<i class="fa-solid fa-lock text-[8px] mr-1"></i>Dipilih oleh Host';
+                    }
+                } else {
+                    hostBadge.classList.add('hidden');
                 }
             }
 
             document.querySelectorAll('.top-design-btn').forEach(btn => {
                 const design = btn.getAttribute('data-design');
                 const isSelected = design === activeDesign;
+                const canClick = !isOnline || isHostUser;
+
                 if (isSelected) {
-                    btn.className = "top-design-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02]";
+                    btn.className = `top-design-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02] ${!canClick ? 'opacity-80 pointer-events-none' : ''}`;
                     const title = btn.querySelector('p');
                     if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
                 } else {
-                    btn.className = "top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 opacity-80";
+                    btn.className = `top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 ${!canClick ? 'opacity-40 pointer-events-none cursor-not-allowed' : 'opacity-80'}`;
                     const title = btn.querySelector('p');
                     if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
                 }
@@ -2072,7 +2666,7 @@
             if (room.topDesign && room.topDesign !== gameState.topDesign) {
                 buildTopBarrelDesign(room.topDesign);
             }
-            updateTopDesignUI(room.topDesign || selectedTopDesign, isHost);
+            updateRoomModalState();
 
             renderLobbyPlayers(room.players, room.hostId);
             updateHostOnlyControls(room);
@@ -2093,13 +2687,13 @@
                     if (prevStatus === 'lobby' || prevStatus === null) showToast('Pertandingan dimulai!', 'success');
                 }
 
-                // Swords inserted by any player
+                // Swords inserted by any player with their custom swordSkin
                 const inserted = room.insertedSlots || [];
                 gameState.insertedSlots = inserted.map(s => Number(s.slotId));
                 inserted.forEach(s => {
                     const slot = slots.find(x => x.id === Number(s.slotId));
                     if (slot && !slot.plugged) {
-                        plugSwordIntoSlot(Number(s.slotId), PLAYER_COLORS[(s.playerIndex || 0) % PLAYER_COLORS.length]);
+                        plugSwordIntoSlot(Number(s.slotId), PLAYER_COLORS[(s.playerIndex || 0) % PLAYER_COLORS.length], s.swordSkin || 'classic');
                     }
                 });
 
@@ -2128,7 +2722,7 @@
             if (!currentRoomId) return;
             insertInFlight = true;
             try {
-                const data = await apiCall('insert', { slotId: Number(slotId) });
+                const data = await apiCall('insert', { slotId: Number(slotId), swordSkin: selectedSwordSkin });
                 applyRoomState(data.room);
             } catch (e) {
                 showToast(e.message);
@@ -2225,7 +2819,29 @@
                     }
                 });
             });
+
+            // Sword Skin Picker Events (Available for all players)
+            document.querySelectorAll('.sword-skin-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const skin = btn.getAttribute('data-skin');
+                    if (!skin) return;
+
+                    selectedSwordSkin = skin;
+                    localStorage.setItem('pirate_sword_skin', skin);
+                    updateSwordSkinUI(skin);
+                    showToast(`Skin pedang diubah: ${btn.querySelector('p')?.textContent || skin}`, 'success');
+
+                    if (gameState.mode === 'online' && currentRoomId) {
+                        try {
+                            const data = await apiCall('setSwordSkin', { swordSkin: skin });
+                            applyRoomState(data.room);
+                        } catch(err) {}
+                    }
+                });
+            });
+
             document.getElementById('tab-pass-play').addEventListener('click', () => {
+                if (gameState.mode === 'online' && currentRoomId) return; // Locked during room
                 document.getElementById('section-pass-play').classList.remove('hidden');
                 document.getElementById('section-online').classList.add('hidden');
                 document.getElementById('tab-pass-play').className = "py-1.5 sm:py-2 text-xs font-bold rounded-lg text-yellow-300 bg-amber-900/80 border border-amber-700/60 shadow";
@@ -2234,6 +2850,7 @@
             });
 
             document.getElementById('tab-online').addEventListener('click', () => {
+                if (gameState.mode === 'online' && currentRoomId) return;
                 document.getElementById('section-online').classList.remove('hidden');
                 document.getElementById('section-pass-play').classList.add('hidden');
                 document.getElementById('tab-online').className = "py-1.5 sm:py-2 text-xs font-bold rounded-lg text-yellow-300 bg-amber-900/80 border border-amber-700/60 shadow";
@@ -2248,9 +2865,9 @@
             document.getElementById('btn-start-local').addEventListener('click', async () => {
                 const count = parseInt(localSlider.value);
                 await leaveCurrentRoom();
-                document.getElementById('online-lobby-status').classList.add('hidden');
-                document.getElementById('room-code-display').textContent = "Pass & Play (Lokal)";
                 gameState.mode = 'local';
+                document.getElementById('room-code-display').textContent = "Pass & Play (Lokal)";
+                updateRoomModalState();
                 updateHostOnlyControls(null);
                 gameState.players = Array.from({ length: count }, (_, i) => ({
                     id: `p${i + 1}`,
@@ -2266,6 +2883,50 @@
 
             document.getElementById('btn-create-room').addEventListener('click', createOnlineRoom);
             document.getElementById('btn-join-room').addEventListener('click', joinOnlineRoom);
+
+            const roomCodeInput = document.getElementById('room-code-input');
+            if (roomCodeInput) {
+                roomCodeInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                });
+            }
+
+            // Copy Room Code Button
+            const copyBtn = document.getElementById('btn-copy-code');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    if (!currentRoomId) return;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(currentRoomId).then(() => {
+                            showToast(`Kode room #${currentRoomId} disalin!`, 'success');
+                        }).catch(() => {
+                            showToast(`Kode room: #${currentRoomId}`, 'info');
+                        });
+                    } else {
+                        showToast(`Kode room: #${currentRoomId}`, 'info');
+                    }
+                });
+            }
+
+            // Leave Room Button (for both Host & Joiner)
+            const leaveBtn = document.getElementById('btn-leave-room');
+            if (leaveBtn) {
+                leaveBtn.addEventListener('click', async () => {
+                    leaveBtn.disabled = true;
+                    try {
+                        await leaveCurrentRoom();
+                        gameState.mode = 'local';
+                        document.getElementById('room-code-display').textContent = "Pass & Play (Lokal)";
+                        updateRoomModalState();
+                        document.getElementById('tab-pass-play').click();
+                        showToast('Kamu telah keluar dari room', 'info');
+                    } catch (e) {
+                        showToast(`Gagal keluar: ${e.message}`);
+                    } finally {
+                        leaveBtn.disabled = false;
+                    }
+                });
+            }
 
             // HOST ONLY: start match (joiners never see this button; server also enforces it)
             document.getElementById('btn-start-online').addEventListener('click', async () => {
@@ -2330,13 +2991,18 @@
                 updateScoreboardUI();
             });
 
+            // Settings / Room Modal Toggle
             document.getElementById('btn-toggle-menu').addEventListener('click', () => {
+                updateRoomModalState();
                 document.getElementById('room-modal').classList.remove('hidden');
                 document.getElementById('btn-close-modal').classList.remove('hidden');
             });
             document.getElementById('btn-close-modal').addEventListener('click', () => {
                 document.getElementById('room-modal').classList.add('hidden');
             });
+
+            // Initial UI state setup
+            updateRoomModalState();
         }
 
         function animate() {

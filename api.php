@@ -46,8 +46,21 @@ function cleanName($name) {
     return mb_substr($name, 0, 20);
 }
 
-function newPlayer($uid, $name) {
-    return ['id' => $uid, 'name' => cleanName($name), 'score' => 0, 'swords' => 0, 'wins' => 0, 'losses' => 0, 'lastSeen' => time()];
+function cleanSkin($skin) {
+    return in_array($skin, ['classic', 'laser', 'gold', 'bone'], true) ? $skin : 'classic';
+}
+
+function newPlayer($uid, $name, $swordSkin = 'classic') {
+    return [
+        'id' => $uid,
+        'name' => cleanName($name),
+        'swordSkin' => cleanSkin($swordSkin),
+        'score' => 0,
+        'swords' => 0,
+        'wins' => 0,
+        'losses' => 0,
+        'lastSeen' => time()
+    ];
 }
 
 function startRound(&$room) {
@@ -127,9 +140,7 @@ switch ($action) {
     case 'create': {
         $slotCount = max(1, min(64, (int)($input['slotCount'] ?? 18)));
         do {
-            $code = '';
-            $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            for ($i = 0; $i < 5; $i++) $code .= $chars[random_int(0, strlen($chars) - 1)];
+            $code = (string)random_int(10000, 99999);
         } while (file_exists(roomPath($code)));
 
         $allowedDesigns = ['lid', 'energy', 'anchor', 'kraken', 'crown', 'compass', 'atom'];
@@ -143,7 +154,7 @@ switch ($action) {
             'status' => 'lobby',
             'topDesign' => $topDesign,
             'slotCount' => $slotCount,
-            'players' => [newPlayer($uid, $input['name'] ?? '')],
+            'players' => [newPlayer($uid, $input['name'] ?? '', $input['swordSkin'] ?? 'classic')],
             'version' => 1,
             'round' => 0,
             'updatedAt' => time(),
@@ -167,17 +178,29 @@ switch ($action) {
         respond(publicRoom($room));
     }
 
+    case 'setSwordSkin': {
+        $skin = cleanSkin($input['swordSkin'] ?? 'classic');
+        $room = withRoom($code, function (&$room) use ($uid, $skin) {
+            $idx = playerIndex($room, $uid);
+            if ($idx < 0) return false;
+            $room['players'][$idx]['swordSkin'] = $skin;
+            return true;
+        });
+        respond(publicRoom($room));
+    }
+
     case 'join': {
         $room = withRoom($code, function (&$room) use ($uid, $input) {
             pruneInactive($room);
             $idx = playerIndex($room, $uid);
             if ($idx >= 0) {
                 $room['players'][$idx]['name'] = cleanName($input['name'] ?? $room['players'][$idx]['name']);
+                if (isset($input['swordSkin'])) $room['players'][$idx]['swordSkin'] = cleanSkin($input['swordSkin']);
                 $room['players'][$idx]['lastSeen'] = time();
                 return true;
             }
             if (count($room['players']) >= MAX_PLAYERS) fail('Room penuh (maks ' . MAX_PLAYERS . ' pemain)', 409);
-            $room['players'][] = newPlayer($uid, $input['name'] ?? '');
+            $room['players'][] = newPlayer($uid, $input['name'] ?? '', $input['swordSkin'] ?? 'classic');
             return true;
         });
         respond(publicRoom($room));
@@ -229,7 +252,8 @@ switch ($action) {
 
     case 'insert': {
         $slotId = (int)($input['slotId'] ?? -1);
-        $room = withRoom($code, function (&$room) use ($uid, $slotId) {
+        $swordSkin = cleanSkin($input['swordSkin'] ?? '');
+        $room = withRoom($code, function (&$room) use ($uid, $slotId, $swordSkin) {
             if ($room['status'] !== 'playing') fail('Game belum dimulai', 409);
             if ($room['isGameOver']) fail('Ronde sudah selesai', 409);
             $turn = $room['currentTurnIndex'];
@@ -238,7 +262,8 @@ switch ($action) {
             if ($slotId < 0 || $slotId >= $room['slotCount']) fail('Slot tidak valid');
             foreach ($room['insertedSlots'] as $s) if ((int)$s['slotId'] === $slotId) fail('Slot sudah terisi', 409);
 
-            $room['insertedSlots'][] = ['slotId' => $slotId, 'playerIndex' => $turn, 'playerId' => $uid];
+            $skin = $swordSkin ?: ($active['swordSkin'] ?? 'classic');
+            $room['insertedSlots'][] = ['slotId' => $slotId, 'playerIndex' => $turn, 'playerId' => $uid, 'swordSkin' => $skin];
             $isTrap = ($slotId === (int)$room['trapSlotId']) || (count($room['insertedSlots']) >= $room['slotCount']);
 
             if ($isTrap) {
