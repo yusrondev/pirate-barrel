@@ -124,7 +124,7 @@
     <!-- Bottom Game Controls -->
     <div class="relative z-10 p-2 sm:p-4 flex flex-col items-center pointer-events-none mb-1 safe-bottom">
         <!-- Manual Rotation Buttons -->
-        <div class="pointer-events-auto flex items-center gap-3 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-amber-900/50 shadow-2xl">
+        <div id="bottom-controls" class="pointer-events-auto flex items-center gap-3 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-amber-900/50 shadow-2xl transition-opacity">
             <button id="btn-rotate-left" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-900/90 hover:bg-amber-800 active:scale-90 text-amber-300 flex items-center justify-center text-base sm:text-lg transition border border-amber-700/60 shadow" title="Putar Kiri">
                 <i class="fa-solid fa-rotate-left"></i>
             </button>
@@ -964,6 +964,10 @@
             const mouse = new THREE.Vector2();
 
             const onPointerStart = (clientX, clientY) => {
+                // Di mode online, pemain yang bukan gilirannya TIDAK BISA memutar drum atau menyentuh
+                if (gameState.mode === 'online' && !isCurrentTurn()) return;
+                if (gameState.isGameOver) return;
+
                 isPointerDown = true;
                 pointerStartX = clientX;
                 pointerStartY = clientY;
@@ -976,6 +980,8 @@
 
             const onPointerMove = (clientX, clientY) => {
                 if (!isPointerDown) return;
+                if (gameState.mode === 'online' && !isCurrentTurn()) return;
+
                 const now = performance.now();
                 const deltaX = clientX - lastPointerX;
                 const dt = Math.max(1, now - lastPointerTime);
@@ -997,13 +1003,14 @@
                 if (!isPointerDown) return;
                 isPointerDown = false;
 
+                if (gameState.mode === 'online' && !isCurrentTurn()) return;
+
                 angularVelocity = Math.max(-0.06, Math.min(0.06, angularVelocity));
                 const dragDuration = performance.now() - dragStartTime;
 
                 // Generous tap tolerance for mobile screens
                 if (totalDragDistance < 22 && dragDuration < 600) {
                     if (gameState.isGameOver) return;
-                    if (gameState.mode === 'online' && !isCurrentTurn()) return;
 
                     mouse.x = (clientX / window.innerWidth) * 2 - 1;
                     mouse.y = -(clientY / window.innerHeight) * 2 + 1;
@@ -1033,6 +1040,7 @@
 
             // UI Rotation Buttons
             document.getElementById('btn-rotate-left').addEventListener('click', () => {
+                if (gameState.mode === 'online' && !isCurrentTurn()) return;
                 targetRotationY -= 0.65;
                 angularVelocity = -0.015;
                 AudioFX.playClick();
@@ -1040,6 +1048,7 @@
             });
 
             document.getElementById('btn-rotate-right').addEventListener('click', () => {
+                if (gameState.mode === 'online' && !isCurrentTurn()) return;
                 targetRotationY += 0.65;
                 angularVelocity = 0.015;
                 AudioFX.playClick();
@@ -1052,6 +1061,7 @@
             if (gameState.insertedSlots.includes(numId)) return;
 
             if (gameState.mode === 'online') {
+                if (!isCurrentTurn()) return;
                 executeTurnOnline(numId);
             } else {
                 executeTurnLocal(numId);
@@ -1094,22 +1104,59 @@
         }
 
         function isCurrentTurn() {
-            if (!currentUser) return true;
+            if (gameState.mode !== 'online') return true;
+            if (!currentUser || !gameState.players || !gameState.players[gameState.currentTurnIndex]) return false;
             const activePlayer = gameState.players[gameState.currentTurnIndex];
-            return activePlayer && activePlayer.id === currentUser.uid;
+            return activePlayer.id === currentUser.uid;
         }
 
         function updateTurnUI() {
             let activeName = "";
+            const turnBadge = document.getElementById('turn-badge');
+            const bottomControls = document.getElementById('bottom-controls');
+            const canvasContainer = document.getElementById('canvas-container');
+
             if (gameState.mode === 'online') {
                 const activePlayer = gameState.players[gameState.currentTurnIndex];
                 activeName = activePlayer ? activePlayer.name : "Menunggu...";
+                const myTurn = isCurrentTurn();
+
+                if (myTurn) {
+                    if (turnBadge) {
+                        turnBadge.className = "px-2.5 py-0.5 rounded-full bg-emerald-900/90 border border-emerald-400 text-[11px] sm:text-xs font-bold text-emerald-300 flex items-center gap-1 shadow-lg animate-pulse";
+                        turnBadge.innerHTML = `<i class="fa-solid fa-play text-emerald-400 text-[10px]"></i> <span>GILIRAN KAMU!</span>`;
+                    }
+                    if (bottomControls) {
+                        bottomControls.classList.remove('opacity-30', 'pointer-events-none');
+                    }
+                    if (canvasContainer) {
+                        canvasContainer.className = "absolute inset-0 z-0 cursor-grab active:cursor-grabbing";
+                    }
+                } else {
+                    if (turnBadge) {
+                        turnBadge.className = "px-2.5 py-0.5 rounded-full bg-amber-950/90 border border-amber-800 text-[11px] sm:text-xs font-semibold text-amber-300/90 flex items-center gap-1 shadow";
+                        turnBadge.innerHTML = `<i class="fa-solid fa-hourglass-half text-amber-400 text-[10px]"></i> <span>Giliran: ${activeName}</span>`;
+                    }
+                    if (bottomControls) {
+                        bottomControls.classList.add('opacity-30', 'pointer-events-none');
+                    }
+                    if (canvasContainer) {
+                        canvasContainer.className = "absolute inset-0 z-0 cursor-not-allowed";
+                    }
+                }
             } else {
                 activeName = gameState.players[gameState.currentTurnIndex]?.name || "Player 1";
+                if (turnBadge) {
+                    turnBadge.className = "px-2 py-0.5 rounded-full bg-amber-900/90 border border-yellow-500/60 text-[11px] sm:text-xs font-bold text-yellow-300 flex items-center gap-1 shadow animate-pulse";
+                    turnBadge.innerHTML = `<i class="fa-solid fa-hourglass-half text-[10px] text-yellow-400"></i> <span id="turn-text">${activeName}</span>`;
+                }
+                if (bottomControls) {
+                    bottomControls.classList.remove('opacity-30', 'pointer-events-none');
+                }
+                if (canvasContainer) {
+                    canvasContainer.className = "absolute inset-0 z-0 cursor-grab active:cursor-grabbing";
+                }
             }
-
-            const turnEl = document.getElementById('turn-text');
-            if (turnEl) turnEl.textContent = activeName;
         }
 
         function updateScoreboardUI() {
@@ -1316,7 +1363,7 @@
                     document.getElementById('room-modal').classList.add('hidden');
                 }
 
-                if (data.rotationAngle !== undefined && !isPointerDown) {
+                if (data.rotationAngle !== undefined && !isCurrentTurn()) {
                     targetRotationY = data.rotationAngle;
                 }
 
@@ -1341,7 +1388,7 @@
         }
 
         async function syncRoomRotation(angle) {
-            if (!currentRoomId || !db) return;
+            if (!currentRoomId || !db || !isCurrentTurn()) return;
             try {
                 const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
                 await updateDoc(roomRef, { rotationAngle: angle });
