@@ -419,9 +419,14 @@
         let pollTimer = null;
         let pollInFlight = false;
         let lastRotationSentAt = 0;
-        let lastRotationSentValue = null;
+        let lastRotationSentAngle = null;
+        let lastRotationSentVelocity = null;
         let rotationInFlight = false;
         let insertInFlight = false;
+
+        let remoteTargetAngle = 0;
+        let remoteAngularVelocity = 0;
+        let remoteLastReceivedAt = performance.now();
 
         async function apiCall(action, payload = {}) {
             const res = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
@@ -2376,16 +2381,37 @@
         }
 
         function updatePhysicsAndParticles() {
-            // Smooth Rotation Momentum & Damping
-            if (!isPointerDown) {
-                targetRotationY += angularVelocity;
-                angularVelocity *= 0.92;
-                if (Math.abs(angularVelocity) < 0.0001) {
-                    angularVelocity = 0;
+            // Smooth Rotation Momentum & Damping with Dead Reckoning for Multiplayer Spectators
+            if (gameState.mode === 'online' && !isCurrentTurn()) {
+                const now = performance.now();
+                const dtSec = Math.min(0.25, (now - remoteLastReceivedAt) / 1000);
+                
+                // Extrapolasi target posisi halus selama jeda antar polling
+                const extrapolatedTarget = remoteTargetAngle + (remoteAngularVelocity * dtSec * 60);
+                const angleDiff = extrapolatedTarget - currentRotationY;
+
+                if (Math.abs(angleDiff) > 3.5) {
+                    // Snap jika desinkronisasi terlalu jauh atau reset ronde
+                    currentRotationY = extrapolatedTarget;
+                    targetRotationY = extrapolatedTarget;
+                } else {
+                    // Smooth 60 FPS damping interpolation
+                    currentRotationY += angleDiff * 0.22;
+                    targetRotationY = currentRotationY;
                 }
+                angularVelocity = remoteAngularVelocity;
+            } else {
+                // Local mode or current turn active player
+                if (!isPointerDown) {
+                    targetRotationY += angularVelocity;
+                    angularVelocity *= 0.92;
+                    if (Math.abs(angularVelocity) < 0.0001) {
+                        angularVelocity = 0;
+                    }
+                }
+                currentRotationY += (targetRotationY - currentRotationY) * 0.22;
             }
 
-            currentRotationY += (targetRotationY - currentRotationY) * 0.22;
             barrelGroup.rotation.y = currentRotationY;
             gameState.rotationAngle = currentRotationY;
 
@@ -2622,14 +2648,21 @@
         function maybeSyncRotation() {
             if (!canSyncRotation() || rotationInFlight) return;
             const now = performance.now();
-            if (now - lastRotationSentAt < 90) return;
-            if (lastRotationSentValue !== null && Math.abs(targetRotationY - lastRotationSentValue) < 0.002) return;
+            if (now - lastRotationSentAt < 60) return;
 
             const angle = targetRotationY;
+            const velocity = angularVelocity;
+
+            const angleDiff = lastRotationSentAngle === null ? 1 : Math.abs(angle - lastRotationSentAngle);
+            const velDiff = lastRotationSentVelocity === null ? 1 : Math.abs(velocity - lastRotationSentVelocity);
+
+            if (angleDiff < 0.003 && velDiff < 0.0008) return;
+
             lastRotationSentAt = now;
-            lastRotationSentValue = angle;
+            lastRotationSentAngle = angle;
+            lastRotationSentVelocity = velocity;
             rotationInFlight = true;
-            apiCall('rotate', { angle })
+            apiCall('rotate', { angle, velocity })
                 .catch(() => {})
                 .finally(() => { rotationInFlight = false; });
         }
@@ -3000,8 +3033,12 @@
             roomVersion = 0;
             onlineRound = -1;
             onlineStatus = null;
-            lastRotationSentValue = null;
+            lastRotationSentAngle = null;
+            lastRotationSentVelocity = null;
             insertInFlight = false;
+            remoteTargetAngle = currentRotationY;
+            remoteAngularVelocity = 0;
+            remoteLastReceivedAt = performance.now();
         }
 
         function updateSwordSkinUI(activeSkin) {
@@ -3164,7 +3201,7 @@
                     }
                 }
                 // Faster polling while playing for smooth realtime drum sync
-                const delay = onlineStatus === 'playing' ? 120 : 700;
+                const delay = onlineStatus === 'playing' ? 80 : 700;
                 pollTimer = setTimeout(tick, delay);
             };
             tick();
@@ -3280,7 +3317,11 @@
                     resetGameSession();
                     currentRotationY = targetRotationY = room.rotationAngle || 0;
                     angularVelocity = 0;
-                    lastRotationSentValue = targetRotationY;
+                    lastRotationSentAngle = targetRotationY;
+                    lastRotationSentVelocity = 0;
+                    remoteTargetAngle = targetRotationY;
+                    remoteAngularVelocity = 0;
+                    remoteLastReceivedAt = performance.now();
                     document.getElementById('room-modal').classList.add('hidden');
                     document.getElementById('gameover-modal').classList.add('hidden');
                     if (prevStatus === 'lobby' || prevStatus === null) showToast('Pertandingan dimulai!', 'success');
@@ -3298,10 +3339,11 @@
 
                 gameState.currentTurnIndex = room.currentTurnIndex || 0;
 
-                // Spectators follow the active player's drum rotation in realtime
+                // Spectators follow the active player's drum rotation smoothly via dead reckoning
                 if (!isCurrentTurn() && typeof room.rotationAngle === 'number') {
-                    targetRotationY = room.rotationAngle;
-                    angularVelocity = 0;
+                    remoteTargetAngle = room.rotationAngle;
+                    remoteAngularVelocity = typeof room.rotationVelocity === 'number' ? room.rotationVelocity : 0;
+                    remoteLastReceivedAt = performance.now();
                     isPointerDown = false;
                 }
 

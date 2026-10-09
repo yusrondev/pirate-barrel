@@ -77,6 +77,7 @@ function startRound(&$room) {
     $room['loserName'] = null;
     $room['currentTurnIndex'] = 0;
     $room['rotationAngle'] = 0;
+    $room['rotationVelocity'] = 0;
     $room['trapSlotId'] = random_int(0, max(0, $room['slotCount'] - 1));
 }
 
@@ -259,11 +260,13 @@ switch ($action) {
 
     case 'rotate': {
         $angle = (float)($input['angle'] ?? 0);
-        $room = withRoom($code, function (&$room) use ($uid, $angle) {
+        $velocity = (float)($input['velocity'] ?? 0);
+        $room = withRoom($code, function (&$room) use ($uid, $angle, $velocity) {
             if ($room['status'] !== 'playing' || $room['isGameOver']) return false;
             $active = $room['players'][$room['currentTurnIndex']] ?? null;
             if (!$active || $active['id'] !== $uid) fail('Bukan giliran kamu', 403);
             $room['rotationAngle'] = $angle;
+            $room['rotationVelocity'] = $velocity;
             return true;
         });
         respond(['ok' => true, 'version' => $room['version']]);
