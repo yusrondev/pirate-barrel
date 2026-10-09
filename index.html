@@ -154,7 +154,7 @@
                         <span class="text-xl flex-shrink-0">⚛️</span>
                         <div class="overflow-hidden">
                             <p class="text-xs font-bold text-amber-200 leading-tight truncate">Inti Energi</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Plasma Biru & Orbital</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Plasma Surya & Orbital</p>
                         </div>
                     </button>
                     <button type="button" data-design="anchor" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
@@ -793,28 +793,46 @@
 
             } else if (designType === 'energy' || designType === 'crown') {
                 // =========================================================================
-                // 2. INTI ENERGI ATOM BIRU (Glowing Plasma Core & 3D Orbital Revolving Rings)
+                // 2. INTI ENERGI SOLAR PLASMA (Yellowish-Red Plasma Core, Dynamic PointLight & 3D Orbital Rings)
                 // =========================================================================
                 const darkAlloyMat = new THREE.MeshStandardMaterial({
-                    color: 0x0f172a,
-                    metalness: 0.92,
-                    roughness: 0.28
+                    color: 0x18110c,
+                    metalness: 0.88,
+                    roughness: 0.32
+                });
+                const conduitMat = new THREE.MeshStandardMaterial({
+                    color: 0xff4500,
+                    emissive: 0xcc2200,
+                    emissiveIntensity: 1.4,
+                    roughness: 0.2,
+                    metalness: 0.6
                 });
                 const ringMat = new THREE.MeshStandardMaterial({
-                    color: 0x00f0ff,
-                    emissive: 0x0284c7,
-                    emissiveIntensity: 1.2,
+                    color: 0xffa500,
+                    emissive: 0xff3700,
+                    emissiveIntensity: 1.6,
                     roughness: 0.15,
                     metalness: 0.85
                 });
                 const coreMat = new THREE.MeshStandardMaterial({
-                    color: 0x38bdf8,
-                    emissive: 0x0ea5e9,
-                    emissiveIntensity: 2.0,
+                    color: 0xffcc00,
+                    emissive: 0xff3b00,
+                    emissiveIntensity: 2.5,
+                    roughness: 0.08,
+                    transparent: true,
+                    opacity: 0.92
+                });
+                const innerCoreMat = new THREE.MeshBasicMaterial({
+                    color: 0xfff3a0
+                });
+                const gemMat = new THREE.MeshStandardMaterial({
+                    color: 0xffdd00,
+                    emissive: 0xff5500,
+                    emissiveIntensity: 1.8,
                     roughness: 0.1
                 });
                 const electronMat = new THREE.MeshBasicMaterial({
-                    color: 0xffffff
+                    color: 0xfffae6
                 });
 
                 // Cyber-Arcane Base Plate
@@ -823,8 +841,8 @@
                 basePlate.castShadow = true;
                 pirateHead.add(basePlate);
 
-                // Outer Glowing Blue Conduit Ring
-                const conduitRing = new THREE.Mesh(new THREE.TorusGeometry(1.88, 0.04, 8, 36), ringMat);
+                // Outer Glowing Reddish-Orange Conduit Ring
+                const conduitRing = new THREE.Mesh(new THREE.TorusGeometry(1.88, 0.045, 8, 36), conduitMat);
                 conduitRing.position.y = 0.22;
                 conduitRing.rotation.x = Math.PI / 2;
                 pirateHead.add(conduitRing);
@@ -844,18 +862,30 @@
                     pylon.rotation.z = 0.25;
                     pirateHead.add(pylon);
 
-                    const tipGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.06), ringMat);
+                    const tipGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.065), gemMat);
                     tipGem.position.set(Math.sin(pAngle) * 0.65, 0.62, Math.cos(pAngle) * 0.65);
                     pirateHead.add(tipGem);
                 }
 
-                // Central Glowing Blue Plasma Energy Sphere (Sitting at y = 0.75)
-                const energyCore = new THREE.Mesh(new THREE.SphereGeometry(0.38, 28, 28), coreMat);
-                energyCore.position.set(0, 0.75, 0);
-                energyCore.castShadow = true;
-                pirateHead.add(energyCore);
+                // Multi-layered Yellowish-Reddish Glowing Plasma Energy Sphere (Sitting at y = 0.75)
+                const energyCoreGroup = new THREE.Group();
+                energyCoreGroup.position.set(0, 0.75, 0);
 
-                // 3 Revolving 3D Atomic Orbital Rings with Electrons
+                const energyCore = new THREE.Mesh(new THREE.SphereGeometry(0.38, 28, 28), coreMat);
+                energyCore.castShadow = true;
+                energyCoreGroup.add(energyCore);
+
+                const innerCore = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 20), innerCoreMat);
+                energyCoreGroup.add(innerCore);
+
+                // Dynamic 3D PointLight emanating warm reddish-yellow solar radiance onto the barrel & surrounding swords
+                const energyPointLight = new THREE.PointLight(0xff7700, 2.8, 9.0, 1.8);
+                energyPointLight.position.set(0, 0, 0);
+                energyCoreGroup.add(energyPointLight);
+
+                pirateHead.add(energyCoreGroup);
+
+                // 3 Revolving 3D Atomic Orbital Rings with Electrons (Golden Amber & Reddish Flare)
                 const orbitalRadius = 0.92;
 
                 // Ring 1
@@ -897,6 +927,8 @@
                 pirateEmotionRefs = {
                     type: 'energy',
                     energyCore,
+                    innerCore,
+                    energyPointLight,
                     ringGroup1,
                     ringGroup2,
                     ringGroup3,
@@ -1441,15 +1473,30 @@
                     pirateEmotionRefs.ringGroup3.rotation.y += 0.028 * spinSpeed;
                 }
 
-                const corePulse = 0.9 + Math.sin(time * (3.0 + fear * 8.0)) * (0.12 + fear * 0.18) + (pirateEmotionRefs.flash || 0) * 0.3;
+                const corePulse = 0.9 + Math.sin(time * (3.5 + fear * 8.5)) * (0.12 + fear * 0.18) + (pirateEmotionRefs.flash || 0) * 0.35;
                 if (pirateEmotionRefs.energyCore) {
                     pirateEmotionRefs.energyCore.scale.setScalar(corePulse);
                 }
+                if (pirateEmotionRefs.innerCore) {
+                    pirateEmotionRefs.innerCore.scale.setScalar(0.75 + Math.sin(time * 6.0) * 0.12);
+                }
                 if (pirateEmotionRefs.coreMat) {
-                    pirateEmotionRefs.coreMat.emissiveIntensity = 1.8 + fear * 2.2 + (pirateEmotionRefs.flash || 0) * 2.5;
+                    pirateEmotionRefs.coreMat.emissiveIntensity = 2.2 + fear * 2.5 + (pirateEmotionRefs.flash || 0) * 3.0;
                 }
                 if (pirateEmotionRefs.ringMat) {
-                    pirateEmotionRefs.ringMat.emissiveIntensity = 1.2 + fear * 1.5 + (pirateEmotionRefs.flash || 0) * 2.0;
+                    pirateEmotionRefs.ringMat.emissiveIntensity = 1.4 + fear * 1.8 + (pirateEmotionRefs.flash || 0) * 2.2;
+                }
+                // Dynamic PointLight animation: pulsing solar radiance and insertion flare
+                if (pirateEmotionRefs.energyPointLight) {
+                    const flashVal = pirateEmotionRefs.flash || 0;
+                    const flicker = Math.sin(time * 7.5 + Math.cos(time * 13.0)) * 0.3;
+                    pirateEmotionRefs.energyPointLight.intensity = Math.max(0.6, 2.4 + (fear * 3.6) + flicker + (flashVal * 4.5));
+
+                    // Dynamic color shift from warm golden yellow-orange to fiery crimson orange under high tension / flinch
+                    const r = 1.0;
+                    const g = Math.max(0.22, 0.52 - (fear * 0.28) + (flashVal * 0.18));
+                    const b = Math.max(0.0, 0.06 - (fear * 0.06));
+                    pirateEmotionRefs.energyPointLight.color.setRGB(r, g, b);
                 }
             } else if (gameState.topDesign === 'anchor') {
                 // Jangkar Baja: Valve rotations with pressure build-up
