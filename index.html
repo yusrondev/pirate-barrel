@@ -226,14 +226,12 @@
             </div>
 
             <div class="overflow-x-auto -mx-1">
-                <table class="w-full text-left text-xs text-amber-200 min-w-[300px]">
+                <table class="w-full text-left text-xs text-amber-200 min-w-[280px]">
                     <thead class="bg-amber-950/80 text-amber-400 uppercase font-bold text-[10px] tracking-wider border-b border-amber-800">
                         <tr>
-                            <th class="p-2">Player</th>
-                            <th class="p-2 text-center">Skor</th>
-                            <th class="p-2 text-center">Safe</th>
-                            <th class="p-2 text-center">Menang</th>
-                            <th class="p-2 text-center">Ledakan</th>
+                            <th class="p-2.5">Player</th>
+                            <th class="p-2.5 text-center">Poin (Tusukan Sukses)</th>
+                            <th class="p-2.5 text-center">Kena Ledakan</th>
                         </tr>
                     </thead>
                     <tbody id="scoreboard-table-body" class="divide-y divide-amber-900/40">
@@ -263,12 +261,12 @@
             <div class="bg-black/50 border border-amber-900/60 p-3 rounded-xl mb-3">
                 <p class="text-[10px] text-amber-400 uppercase tracking-widest font-bold">Pemicu Ledakan</p>
                 <p id="loser-name" class="font-pirate text-2xl sm:text-3xl text-yellow-300 mt-0.5">Player X</p>
-                <p class="text-xs text-red-400 mt-0.5 font-semibold">-20 Poin Ledakan</p>
+                <p class="text-xs text-red-400 mt-0.5 font-semibold">Tusukan Kena Jebakan</p>
             </div>
 
             <!-- Round Standings Brief -->
             <div class="mb-4 bg-amber-950/40 border border-amber-900/40 rounded-xl p-2.5">
-                <p class="text-[11px] font-bold text-amber-300 mb-1.5 uppercase tracking-wider">Peringkat Poin Ronde Ini</p>
+                <p class="text-[11px] font-bold text-amber-300 mb-1.5 uppercase tracking-wider">Total Skor Saat Ini</p>
                 <div id="round-summary-list" class="space-y-1 text-xs text-amber-200">
                     <!-- Populated via JS -->
                 </div>
@@ -1080,21 +1078,14 @@
             if (isTrap) {
                 gameState.isGameOver = true;
                 currentPlayer.losses += 1;
-                currentPlayer.score = Math.max(0, currentPlayer.score - 20);
-
-                gameState.players.forEach((p, idx) => {
-                    if (idx !== gameState.currentTurnIndex) {
-                        p.wins += 1;
-                        p.score += 50;
-                    }
-                });
 
                 triggerExplosionFX();
                 updateScoreboardUI();
                 setTimeout(() => showGameOverModal(currentPlayer.name), 1200);
             } else {
+                // Poin bertambah 1 per tusukan sukses yang aman
                 currentPlayer.swords += 1;
-                currentPlayer.score += 10;
+                currentPlayer.score += 1;
 
                 gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.players.length;
                 updateTurnUI();
@@ -1133,7 +1124,7 @@
                             <span class="font-bold text-amber-400 w-4">${idx + 1}.</span>
                             <span class="text-amber-100 font-medium truncate max-w-[90px]">${p.name}</span>
                         </span>
-                        <span class="font-pirate text-base text-yellow-400 font-bold">${p.score}</span>
+                        <span class="font-pirate text-base text-yellow-400 font-bold">${p.score} pts</span>
                     </div>
                 `).join('');
             }
@@ -1143,14 +1134,12 @@
             if (tableBody) {
                 tableBody.innerHTML = sorted.map((p, idx) => `
                     <tr class="hover:bg-amber-900/20 transition">
-                        <td class="p-2 font-semibold text-amber-100 flex items-center gap-1.5">
+                        <td class="p-2.5 font-semibold text-amber-100 flex items-center gap-1.5">
                             <span class="w-4 text-center text-yellow-500 font-bold">${idx + 1}</span>
                             <span class="truncate max-w-[120px]">${p.name}</span>
                         </td>
-                        <td class="p-2 text-center font-pirate text-lg text-yellow-400">${p.score}</td>
-                        <td class="p-2 text-center text-amber-300">${p.swords || 0}</td>
-                        <td class="p-2 text-center text-green-400">${p.wins || 0}</td>
-                        <td class="p-2 text-center text-red-400">${p.losses || 0}</td>
+                        <td class="p-2.5 text-center font-pirate text-xl text-yellow-400">${p.score}</td>
+                        <td class="p-2.5 text-center text-red-400 font-semibold">${p.losses || 0}</td>
                     </tr>
                 `).join('');
             }
@@ -1383,14 +1372,6 @@
 
                 if (isTrap) {
                     activePlayer.losses += 1;
-                    activePlayer.score = Math.max(0, activePlayer.score - 20);
-
-                    updatedPlayers.forEach((p, idx) => {
-                        if (idx !== data.currentTurnIndex) {
-                            p.wins += 1;
-                            p.score += 50;
-                        }
-                    });
 
                     await updateDoc(roomRef, {
                         insertedSlots,
@@ -1400,7 +1381,7 @@
                     });
                 } else {
                     activePlayer.swords += 1;
-                    activePlayer.score += 10;
+                    activePlayer.score += 1;
                     const nextTurn = (data.currentTurnIndex + 1) % data.players.length;
 
                     await updateDoc(roomRef, {
