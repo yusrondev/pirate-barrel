@@ -127,12 +127,50 @@
             </div>
 
             <!-- Player Profile Input -->
-            <div class="mb-4">
+            <div class="mb-3.5">
                 <label class="block text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider mb-1.5">Nama Bajak Laut Kamu</label>
                 <div class="relative">
                     <i class="fa-solid fa-user-ninja absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 text-sm"></i>
                     <input type="text" id="player-name-input" placeholder="Kapten Jack" value="Captain Jack" 
                         class="w-full pl-9 pr-3 py-2 sm:py-2.5 bg-amber-950/60 border border-amber-800 rounded-xl text-amber-100 placeholder-amber-800 text-sm focus:outline-none focus:border-yellow-500">
+                </div>
+            </div>
+
+            <!-- Top Barrel Decoration Selector -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Desain Atas Drum</label>
+                    <span id="design-host-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700/60 hidden">Host Setup</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5" id="top-design-container">
+                    <button type="button" data-design="lid" class="top-design-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
+                        <span class="text-xl flex-shrink-0">🪵</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Tutup Rahasia</p>
+                            <p class="text-[9px] text-amber-300/80 truncate">Kayu & Relief Besi</p>
+                        </div>
+                    </button>
+                    <button type="button" data-design="energy" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">⚛️</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Inti Energi</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Plasma Biru & Orbital</p>
+                        </div>
+                    </button>
+                    <button type="button" data-design="anchor" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">⚓</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Jangkar Baja</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Rantai & Katup Besi</p>
+                        </div>
+                    </button>
+                    <button type="button" data-design="kraken" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">🐙</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Segel Kraken</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Mata Gaib & Tentakel</p>
+                        </div>
+                    </button>
                 </div>
             </div>
 
@@ -420,11 +458,20 @@
         let dragStartTime = 0;
         let syncThrottleTimer = null;
 
+        let selectedTopDesign = 'lid';
+        let pirateEmotionRefs = {};
+        let emotionAnimState = {
+            jolt: 0,
+            fear: 0,
+            eyeScaleY: 1
+        };
+
         const PLAYER_COLORS = [0xff4444, 0x44ff44, 0x4488ff, 0xffff44, 0xff44ff, 0x44ffff];
 
         // Central State & Scoreboard
         let gameState = {
             mode: 'local',
+            topDesign: 'lid',
             players: [
                 { id: 'p1', name: 'Player 1', score: 0, swords: 0, wins: 0, losses: 0 },
                 { id: 'p2', name: 'Player 2', score: 0, swords: 0, wins: 0, losses: 0 },
@@ -446,25 +493,25 @@
             camera.aspect = aspect;
 
             if (aspect < 0.6) {
-                // Tall phone portrait
-                camera.fov = 48;
-                camera.position.set(0, 0.4, 13.8);
-                camera.lookAt(0, 0.0, 0);
+                // Tall phone portrait (e.g. modern mobile screens)
+                camera.fov = 46;
+                camera.position.set(0, 2.3, 12.8);
+                camera.lookAt(0, 0.25, 0);
             } else if (aspect < 1.0) {
                 // Regular phone portrait
-                camera.fov = 46;
-                camera.position.set(0, 0.6, 12.5);
-                camera.lookAt(0, 0.05, 0);
+                camera.fov = 44;
+                camera.position.set(0, 2.4, 11.6);
+                camera.lookAt(0, 0.3, 0);
             } else if (aspect < 1.4) {
                 // Tablet / Square
-                camera.fov = 44;
-                camera.position.set(0, 1.0, 10.5);
-                camera.lookAt(0, 0.1, 0);
+                camera.fov = 42;
+                camera.position.set(0, 2.6, 9.8);
+                camera.lookAt(0, 0.35, 0);
             } else {
                 // Desktop landscape
-                camera.fov = 42;
-                camera.position.set(0, 1.2, 9.2);
-                camera.lookAt(0, 0.15, 0);
+                camera.fov = 40;
+                camera.position.set(0, 2.7, 8.8);
+                camera.lookAt(0, 0.35, 0);
             }
 
             camera.updateProjectionMatrix();
@@ -511,7 +558,7 @@
             barrelGroup.add(intactBarrelGroup);
 
             buildBarrel3D();
-            buildPirateHead3D();
+            buildTopBarrelDesign(selectedTopDesign);
             createKeyholeSlots();
 
             // Floor Shadow Receiver
@@ -621,28 +668,487 @@
             });
         }
 
-        function buildPirateHead3D() {
+        function buildTopBarrelDesign(designType = 'lid') {
+            if (pirateHead) {
+                barrelGroup.remove(pirateHead);
+                pirateHead.traverse(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                        else child.material.dispose();
+                    }
+                });
+            }
+
             pirateHead = new THREE.Group();
+            pirateEmotionRefs = {};
+            selectedTopDesign = designType;
+            gameState.topDesign = designType;
 
-            const headGeo = new THREE.SphereGeometry(0.7, 16, 16);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xffcc99 });
-            const head = new THREE.Mesh(headGeo, headMat);
-            pirateHead.add(head);
+            const woodTex = createWoodTexture();
 
-            const hatGeo = new THREE.ConeGeometry(1.1, 0.8, 4);
-            const hatMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4 });
-            const hat = new THREE.Mesh(hatGeo, hatMat);
-            hat.position.y = 0.7;
-            hat.rotation.y = Math.PI / 4;
-            pirateHead.add(hat);
+            if (designType === 'lid') {
+                // =========================================================================
+                // 1. TUTUP RAHASIA (Solid Dark Oak, Forged Iron Arches & Skull Medallion)
+                // =========================================================================
+                const darkOakMat = new THREE.MeshStandardMaterial({
+                    map: woodTex,
+                    color: 0x4a2e18,
+                    roughness: 0.65,
+                    metalness: 0.1
+                });
+                const forgedIronMat = new THREE.MeshStandardMaterial({
+                    color: 0x27272a,
+                    metalness: 0.88,
+                    roughness: 0.32
+                });
+                const bronzeMat = new THREE.MeshStandardMaterial({
+                    color: 0xd97706,
+                    metalness: 0.85,
+                    roughness: 0.25
+                });
+                const boltMat = new THREE.MeshStandardMaterial({
+                    color: 0x71717a,
+                    metalness: 0.9,
+                    roughness: 0.2
+                });
 
-            const patchGeo = new THREE.SphereGeometry(0.72, 8, 8, 0, Math.PI / 4, 0, Math.PI / 4);
-            const patchMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const patch = new THREE.Mesh(patchGeo, patchMat);
-            patch.rotation.y = Math.PI / 6;
-            pirateHead.add(patch);
+                // Heavy Solid Oak Base Disc
+                const lidDisk = new THREE.Mesh(new THREE.CylinderGeometry(1.92, 1.92, 0.22, 36), darkOakMat);
+                lidDisk.position.y = 0.11;
+                lidDisk.castShadow = true;
+                lidDisk.receiveShadow = true;
+                pirateHead.add(lidDisk);
 
-            pirateHead.position.set(0, 1.8, 0);
+                // Forged Iron Outer Studded Rim
+                const ironRim = new THREE.Mesh(new THREE.TorusGeometry(1.93, 0.07, 12, 36), forgedIronMat);
+                ironRim.position.y = 0.22;
+                ironRim.rotation.x = Math.PI / 2;
+                ironRim.castShadow = true;
+                pirateHead.add(ironRim);
+
+                // 4 Cross Straps
+                const strap1 = new THREE.Mesh(new THREE.BoxGeometry(3.7, 0.05, 0.3), forgedIronMat);
+                strap1.position.y = 0.24;
+                strap1.castShadow = true;
+                pirateHead.add(strap1);
+
+                const strap2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 3.7), forgedIronMat);
+                strap2.position.y = 0.24;
+                strap2.castShadow = true;
+                pirateHead.add(strap2);
+
+                // 3D Bolt Rivets along the arches
+                const boltGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.05, 8);
+                const boltOffsets = [-1.55, -1.05, -0.65, 0.65, 1.05, 1.55];
+                boltOffsets.forEach(pos => {
+                    const bX = new THREE.Mesh(boltGeo, boltMat);
+                    bX.position.set(pos, 0.27, 0);
+                    pirateHead.add(bX);
+
+                    const bZ = new THREE.Mesh(boltGeo, boltMat);
+                    bZ.position.set(0, 0.27, pos);
+                    pirateHead.add(bZ);
+                });
+
+                // Central Elevated Bronze Pedestal & Medallion
+                const medallionBase = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.72, 0.16, 28), bronzeMat);
+                medallionBase.position.y = 0.32;
+                medallionBase.castShadow = true;
+                pirateHead.add(medallionBase);
+
+                // Relief 3D Skull & Crossbones
+                const crestSkull = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), bronzeMat);
+                crestSkull.position.set(0, 0.44, -0.06);
+                crestSkull.scale.set(1, 1.25, 0.75);
+                crestSkull.castShadow = true;
+                pirateHead.add(crestSkull);
+
+                const jawRelief = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.15), bronzeMat);
+                jawRelief.position.set(0, 0.32, 0.02);
+                pirateHead.add(jawRelief);
+
+                const crossBone1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 8), bronzeMat);
+                crossBone1.position.set(0, 0.36, -0.06);
+                crossBone1.rotation.z = Math.PI / 4;
+                pirateHead.add(crossBone1);
+
+                const crossBone2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 8), bronzeMat);
+                crossBone2.position.set(0, 0.36, -0.06);
+                crossBone2.rotation.z = -Math.PI / 4;
+                pirateHead.add(crossBone2);
+
+                // Upright Forged Iron Swivel Ring Handle
+                const handleBase = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.14, 0.16), forgedIronMat);
+                handleBase.position.set(0, 0.4, 0.38);
+                pirateHead.add(handleBase);
+
+                const ringHandle = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.045, 10, 20), forgedIronMat);
+                ringHandle.position.set(0, 0.54, 0.38);
+                ringHandle.rotation.x = 0.4;
+                ringHandle.castShadow = true;
+                pirateHead.add(ringHandle);
+
+                pirateEmotionRefs = { type: 'lid', ringHandle, medallionBase };
+
+            } else if (designType === 'energy' || designType === 'crown') {
+                // =========================================================================
+                // 2. INTI ENERGI ATOM BIRU (Glowing Plasma Core & 3D Orbital Revolving Rings)
+                // =========================================================================
+                const darkAlloyMat = new THREE.MeshStandardMaterial({
+                    color: 0x0f172a,
+                    metalness: 0.92,
+                    roughness: 0.28
+                });
+                const ringMat = new THREE.MeshStandardMaterial({
+                    color: 0x00f0ff,
+                    emissive: 0x0284c7,
+                    emissiveIntensity: 1.2,
+                    roughness: 0.15,
+                    metalness: 0.85
+                });
+                const coreMat = new THREE.MeshStandardMaterial({
+                    color: 0x38bdf8,
+                    emissive: 0x0ea5e9,
+                    emissiveIntensity: 2.0,
+                    roughness: 0.1
+                });
+                const electronMat = new THREE.MeshBasicMaterial({
+                    color: 0xffffff
+                });
+
+                // Cyber-Arcane Base Plate
+                const basePlate = new THREE.Mesh(new THREE.CylinderGeometry(1.92, 1.92, 0.22, 36), darkAlloyMat);
+                basePlate.position.y = 0.11;
+                basePlate.castShadow = true;
+                pirateHead.add(basePlate);
+
+                // Outer Glowing Blue Conduit Ring
+                const conduitRing = new THREE.Mesh(new THREE.TorusGeometry(1.88, 0.04, 8, 36), ringMat);
+                conduitRing.position.y = 0.22;
+                conduitRing.rotation.x = Math.PI / 2;
+                pirateHead.add(conduitRing);
+
+                // Central Magnetic Reactor Pedestal
+                const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.68, 0.25, 24), darkAlloyMat);
+                pedestal.position.y = 0.25;
+                pedestal.castShadow = true;
+                pirateHead.add(pedestal);
+
+                // 4 Curved Magnetic Field Pylons rising around the core
+                for (let p = 0; p < 4; p++) {
+                    const pAngle = (p * Math.PI * 2) / 4;
+                    const pylon = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.2), darkAlloyMat);
+                    pylon.position.set(Math.sin(pAngle) * 0.72, 0.4, Math.cos(pAngle) * 0.72);
+                    pylon.rotation.y = pAngle;
+                    pylon.rotation.z = 0.25;
+                    pirateHead.add(pylon);
+
+                    const tipGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.06), ringMat);
+                    tipGem.position.set(Math.sin(pAngle) * 0.65, 0.62, Math.cos(pAngle) * 0.65);
+                    pirateHead.add(tipGem);
+                }
+
+                // Central Glowing Blue Plasma Energy Sphere (Sitting at y = 0.75)
+                const energyCore = new THREE.Mesh(new THREE.SphereGeometry(0.38, 28, 28), coreMat);
+                energyCore.position.set(0, 0.75, 0);
+                energyCore.castShadow = true;
+                pirateHead.add(energyCore);
+
+                // 3 Revolving 3D Atomic Orbital Rings with Electrons
+                const orbitalRadius = 0.92;
+
+                // Ring 1
+                const ringGroup1 = new THREE.Group();
+                ringGroup1.position.set(0, 0.75, 0);
+                ringGroup1.rotation.x = 1.1;
+                ringGroup1.rotation.y = 0.35;
+                const ringMesh1 = new THREE.Mesh(new THREE.TorusGeometry(orbitalRadius, 0.038, 12, 48), ringMat);
+                ringGroup1.add(ringMesh1);
+                const electron1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), electronMat);
+                electron1.position.set(orbitalRadius, 0, 0);
+                ringGroup1.add(electron1);
+                pirateHead.add(ringGroup1);
+
+                // Ring 2
+                const ringGroup2 = new THREE.Group();
+                ringGroup2.position.set(0, 0.75, 0);
+                ringGroup2.rotation.x = -1.1;
+                ringGroup2.rotation.y = -0.35;
+                const ringMesh2 = new THREE.Mesh(new THREE.TorusGeometry(orbitalRadius, 0.038, 12, 48), ringMat);
+                ringGroup2.add(ringMesh2);
+                const electron2 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), electronMat);
+                electron2.position.set(-orbitalRadius, 0, 0);
+                ringGroup2.add(electron2);
+                pirateHead.add(ringGroup2);
+
+                // Ring 3
+                const ringGroup3 = new THREE.Group();
+                ringGroup3.position.set(0, 0.75, 0);
+                ringGroup3.rotation.z = 1.35;
+                ringGroup3.rotation.x = 0.35;
+                const ringMesh3 = new THREE.Mesh(new THREE.TorusGeometry(orbitalRadius, 0.038, 12, 48), ringMat);
+                ringGroup3.add(ringMesh3);
+                const electron3 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), electronMat);
+                electron3.position.set(0, orbitalRadius, 0);
+                ringGroup3.add(electron3);
+                pirateHead.add(ringGroup3);
+
+                pirateEmotionRefs = {
+                    type: 'energy',
+                    energyCore,
+                    ringGroup1,
+                    ringGroup2,
+                    ringGroup3,
+                    ringMat,
+                    coreMat,
+                    flash: 0
+                };
+
+            } else if (designType === 'anchor') {
+                // =========================================================================
+                // 3. TUTUP JANGKAR BAJA (Armored Gunmetal Hatch, Perimeter Chain & Upright Anchor)
+                // =========================================================================
+                const navySteelMat = new THREE.MeshStandardMaterial({
+                    color: 0x27272a,
+                    metalness: 0.9,
+                    roughness: 0.35
+                });
+                const ironChainMat = new THREE.MeshStandardMaterial({
+                    color: 0x52525b,
+                    metalness: 0.92,
+                    roughness: 0.28
+                });
+                const brassValveMat = new THREE.MeshStandardMaterial({
+                    color: 0xb45309,
+                    metalness: 0.85,
+                    roughness: 0.3
+                });
+
+                // Armored Steel Base Disc
+                const anchorBase = new THREE.Mesh(new THREE.CylinderGeometry(1.92, 1.92, 0.22, 36), navySteelMat);
+                anchorBase.position.y = 0.11;
+                anchorBase.castShadow = true;
+                pirateHead.add(anchorBase);
+
+                // 8 Radial Heavy Reinforcement Ribs
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i * Math.PI * 2) / 8;
+                    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.06, 0.85), navySteelMat);
+                    rib.position.set(Math.sin(angle) * 1.35, 0.23, Math.cos(angle) * 1.35);
+                    rib.rotation.y = angle;
+                    pirateHead.add(rib);
+                }
+
+                // 3D Linked Iron Chain around Inner Perimeter Groove (20 Torus Links)
+                const chainRadius = 1.45;
+                const chainLinkCount = 20;
+                for (let c = 0; c < chainLinkCount; c++) {
+                    const angle = (c * Math.PI * 2) / chainLinkCount;
+                    const isEven = c % 2 === 0;
+                    const link = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.04, 8, 14), ironChainMat);
+                    link.position.set(Math.sin(angle) * chainRadius, 0.24, Math.cos(angle) * chainRadius);
+                    link.rotation.y = angle + Math.PI / 2;
+                    link.rotation.z = isEven ? 0.3 : -0.3;
+                    link.castShadow = true;
+                    pirateHead.add(link);
+                }
+
+                // Massive Upright 3D Naval Anchor (Tilted at 35° standing proud up to y = 1.3!)
+                const anchorGroup = new THREE.Group();
+                anchorGroup.position.set(0, 0.25, 0);
+                anchorGroup.rotation.x = -0.4; // Upright forward tilt
+
+                // Vertical Shank
+                const shank = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.14, 1.6), ironChainMat);
+                shank.position.set(0, 0.45, 0.1);
+                shank.rotation.x = Math.PI / 2;
+                shank.castShadow = true;
+                anchorGroup.add(shank);
+
+                // Top Stock Crossbar
+                const stock = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.25, 12), ironChainMat);
+                stock.rotation.z = Math.PI / 2;
+                stock.position.set(0, 1.05, 0.1);
+                stock.castShadow = true;
+                anchorGroup.add(stock);
+
+                // Stock End Knobs
+                const knob1 = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), brassValveMat);
+                knob1.position.set(0.63, 1.05, 0.1);
+                anchorGroup.add(knob1);
+
+                const knob2 = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), brassValveMat);
+                knob2.position.set(-0.63, 1.05, 0.1);
+                anchorGroup.add(knob2);
+
+                // Top Shackle Ring
+                const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.045, 8, 16), ironChainMat);
+                shackle.position.set(0, 1.25, 0.1);
+                shackle.castShadow = true;
+                anchorGroup.add(shackle);
+
+                // Curved Anchor Arms & Barbed Flukes at base
+                const arms = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.08, 8, 18, Math.PI), ironChainMat);
+                arms.position.set(0, -0.15, 0.1);
+                arms.rotation.x = Math.PI;
+                arms.castShadow = true;
+                anchorGroup.add(arms);
+
+                const flukeL = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.42, 4), ironChainMat);
+                flukeL.position.set(-0.6, 0.02, 0.1);
+                flukeL.rotation.z = -0.5;
+                anchorGroup.add(flukeL);
+
+                const flukeR = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.42, 4), ironChainMat);
+                flukeR.position.set(0.6, 0.02, 0.1);
+                flukeR.rotation.z = 0.5;
+                anchorGroup.add(flukeR);
+
+                pirateHead.add(anchorGroup);
+
+                // 4 Marine Steam Pressure Valves
+                const valves = [];
+                const valveAngles = [Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4];
+                valveAngles.forEach(vAngle => {
+                    const vGroup = new THREE.Group();
+                    vGroup.position.set(Math.sin(vAngle) * 0.95, 0.24, Math.cos(vAngle) * 0.95);
+
+                    const vBase = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.09, 12), brassValveMat);
+                    vGroup.add(vBase);
+
+                    const vWheel = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.028, 6, 12), brassValveMat);
+                    vWheel.position.y = 0.08;
+                    vWheel.rotation.x = Math.PI / 2;
+                    vGroup.add(vWheel);
+
+                    const vCross = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.02, 0.035), brassValveMat);
+                    vCross.position.y = 0.08;
+                    vGroup.add(vCross);
+
+                    pirateHead.add(vGroup);
+                    valves.push(vGroup);
+                });
+
+                pirateEmotionRefs = { type: 'anchor', anchorGroup, valves };
+
+            } else if (designType === 'kraken') {
+                // =========================================================================
+                // 4. TUTUP SEGEL KRAKEN (Obsidian Stone, Tall Curving Tentacles & Eldritch Eye)
+                // =========================================================================
+                const obsidianMat = new THREE.MeshStandardMaterial({
+                    color: 0x18181b,
+                    roughness: 0.35,
+                    metalness: 0.2
+                });
+                const runeGlowMat = new THREE.MeshStandardMaterial({
+                    color: 0x06b6d4,
+                    emissive: 0x0891b2,
+                    emissiveIntensity: 0.85,
+                    roughness: 0.2
+                });
+                const tentacleMat = new THREE.MeshStandardMaterial({
+                    color: 0x0f766e,
+                    roughness: 0.5,
+                    metalness: 0.15
+                });
+                const suctionMat = new THREE.MeshStandardMaterial({
+                    color: 0xa5f3fc,
+                    roughness: 0.3
+                });
+                const eyeGlowMat = new THREE.MeshStandardMaterial({
+                    color: 0xa855f7,
+                    emissive: 0x9333ea,
+                    emissiveIntensity: 1.3,
+                    roughness: 0.15
+                });
+
+                // Obsidian Disc Base
+                const obsidianBase = new THREE.Mesh(new THREE.CylinderGeometry(1.92, 1.92, 0.2, 36), obsidianMat);
+                obsidianBase.position.y = 0.1;
+                obsidianBase.castShadow = true;
+                pirateHead.add(obsidianBase);
+
+                // Engraved Rune Circle Ring
+                const runeRing = new THREE.Mesh(new THREE.TorusGeometry(1.45, 0.03, 8, 36), runeGlowMat);
+                runeRing.position.y = 0.21;
+                runeRing.rotation.x = Math.PI / 2;
+                pirateHead.add(runeRing);
+
+                // 8 Carved Arcane Rune Glyph Blocks
+                for (let r = 0; r < 8; r++) {
+                    const angle = (r * Math.PI * 2) / 8;
+                    const runeBox = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.04, 0.14), runeGlowMat);
+                    runeBox.position.set(Math.sin(angle) * 1.15, 0.22, Math.cos(angle) * 1.15);
+                    runeBox.rotation.y = angle + 0.4;
+                    pirateHead.add(runeBox);
+                }
+
+                // 4 Giant Sculpted Sea-Monster Tentacles rising high into the air (Up to y = 1.35!)
+                const tentacles = [];
+                for (let t = 0; t < 4; t++) {
+                    const tAngle = (t * Math.PI * 2) / 4;
+                    const tGroup = new THREE.Group();
+                    tGroup.position.set(Math.sin(tAngle) * 1.65, 0.15, Math.cos(tAngle) * 1.65);
+                    tGroup.rotation.y = tAngle;
+
+                    // Base segment
+                    const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.24, 0.6, 12), tentacleMat);
+                    seg1.position.set(0, 0.28, -0.22);
+                    seg1.rotation.x = -0.55;
+                    seg1.castShadow = true;
+                    tGroup.add(seg1);
+
+                    // Mid curved segment (Reaching high!)
+                    const seg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.16, 0.6, 12), tentacleMat);
+                    seg2.position.set(0, 0.62, -0.55);
+                    seg2.rotation.x = -1.15;
+                    seg2.castShadow = true;
+                    tGroup.add(seg2);
+
+                    // Tip curled segment
+                    const seg3 = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.55, 12), tentacleMat);
+                    seg3.position.set(0, 0.78, -0.92);
+                    seg3.rotation.x = -1.85;
+                    seg3.castShadow = true;
+                    tGroup.add(seg3);
+
+                    // Suction Cups along the underside
+                    for (let s = 0; s < 6; s++) {
+                        const suction = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), suctionMat);
+                        suction.position.set(0, 0.15 + s * 0.11, -0.15 - s * 0.18);
+                        tGroup.add(suction);
+                    }
+
+                    pirateHead.add(tGroup);
+                    tentacles.push(tGroup);
+                }
+
+                // Central Obsidian Claw Pedestal
+                const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.6, 0.16, 16), obsidianMat);
+                pedestal.position.y = 0.24;
+                pedestal.castShadow = true;
+                pirateHead.add(pedestal);
+
+                // Central Glowing Eldritch Eye / Mystic Orb
+                const eldritchEye = new THREE.Mesh(new THREE.SphereGeometry(0.36, 24, 24), eyeGlowMat);
+                eldritchEye.position.y = 0.46;
+                eldritchEye.scale.set(1, 0.9, 1);
+                eldritchEye.castShadow = true;
+                pirateHead.add(eldritchEye);
+
+                pirateEmotionRefs = {
+                    type: 'kraken',
+                    eldritchEye,
+                    runeGlowMat,
+                    eyeGlowMat,
+                    tentacles,
+                    eyeFlash: 0
+                };
+            }
+
+            pirateHead.position.set(0, 1.85, 0);
+            pirateHead.userData = { homePos: pirateHead.position.clone(), homeRot: pirateHead.rotation.clone() };
             barrelGroup.add(pirateHead);
         }
 
@@ -768,6 +1274,18 @@
             return swordGroup;
         }
 
+        function triggerPirateFlinch() {
+            if (pirateEmotionRefs.type === 'energy') {
+                pirateEmotionRefs.flash = 1.6;
+            } else if (pirateEmotionRefs.type === 'kraken') {
+                pirateEmotionRefs.eyeFlash = 1.4;
+            } else if (pirateEmotionRefs.type === 'anchor') {
+                pirateEmotionRefs.valveImpulse = 1.2;
+            } else if (pirateEmotionRefs.type === 'lid') {
+                pirateEmotionRefs.ringSwing = 0.9;
+            }
+        }
+
         function plugSwordIntoSlot(slotId, colorHex = 0xff4444) {
             const slot = slots.find(s => s.id === slotId);
             if (!slot || slot.plugged) return;
@@ -792,6 +1310,7 @@
             pluggedSwords.push(sword);
 
             AudioFX.playInsert();
+            triggerPirateFlinch();
         }
 
         function triggerExplosionFX() {
@@ -803,14 +1322,14 @@
                 headAnimFrame = null;
             }
 
-            // Launch Pirate Head with dramatic thrust and tumbling spin
+            // Launch Pirate Head / Top decoration with dramatic thrust and tumbling spin
             let headVelocityY = 0.55;
-            let headRotX = (Math.random() - 0.5) * 0.3;
-            let headRotZ = (Math.random() - 0.5) * 0.3;
+            let headRotX = (Math.random() - 0.5) * 0.35;
+            let headRotZ = (Math.random() - 0.5) * 0.35;
 
             const animateHead = () => {
                 if (!gameState.isGameOver) return; // Stop immediately if round was restarted
-                if (pirateHead && pirateHead.position.y < 12) {
+                if (pirateHead && pirateHead.position.y < 14) {
                     pirateHead.position.y += headVelocityY;
                     pirateHead.rotation.y += 0.3;
                     pirateHead.rotation.x += headRotX;
@@ -893,6 +1412,76 @@
             }
         }
 
+        function updatePirateEmotions() {
+            if (!pirateHead || gameState.isGameOver) return;
+            const time = performance.now() * 0.001;
+            const fear = (gameState.insertedSlots.length / Math.max(1, slots.length));
+
+            // Keep top lid stably locked on barrel rim at y = 1.85
+            pirateHead.position.set(0, 1.85, 0);
+
+            if (gameState.topDesign === 'lid') {
+                // Tutup Rahasia: Ring Handle swing oscillation
+                pirateEmotionRefs.ringSwing = (pirateEmotionRefs.ringSwing || 0) * 0.94;
+                if (pirateEmotionRefs.ringHandle) {
+                    pirateEmotionRefs.ringHandle.rotation.x = 0.4 + Math.sin(time * 5.0) * (0.04 + (pirateEmotionRefs.ringSwing * 0.25) + fear * 0.05);
+                }
+            } else if (gameState.topDesign === 'energy') {
+                // Inti Energi: Revolving atomic orbital rings & pulsing plasma core
+                pirateEmotionRefs.flash = (pirateEmotionRefs.flash || 0) * 0.92;
+                const spinSpeed = 1.2 + fear * 4.5;
+
+                if (pirateEmotionRefs.ringGroup1) {
+                    pirateEmotionRefs.ringGroup1.rotation.z += 0.03 * spinSpeed;
+                }
+                if (pirateEmotionRefs.ringGroup2) {
+                    pirateEmotionRefs.ringGroup2.rotation.z -= 0.025 * spinSpeed;
+                }
+                if (pirateEmotionRefs.ringGroup3) {
+                    pirateEmotionRefs.ringGroup3.rotation.y += 0.028 * spinSpeed;
+                }
+
+                const corePulse = 0.9 + Math.sin(time * (3.0 + fear * 8.0)) * (0.12 + fear * 0.18) + (pirateEmotionRefs.flash || 0) * 0.3;
+                if (pirateEmotionRefs.energyCore) {
+                    pirateEmotionRefs.energyCore.scale.setScalar(corePulse);
+                }
+                if (pirateEmotionRefs.coreMat) {
+                    pirateEmotionRefs.coreMat.emissiveIntensity = 1.8 + fear * 2.2 + (pirateEmotionRefs.flash || 0) * 2.5;
+                }
+                if (pirateEmotionRefs.ringMat) {
+                    pirateEmotionRefs.ringMat.emissiveIntensity = 1.2 + fear * 1.5 + (pirateEmotionRefs.flash || 0) * 2.0;
+                }
+            } else if (gameState.topDesign === 'anchor') {
+                // Jangkar Baja: Valve rotations with pressure build-up
+                pirateEmotionRefs.valveImpulse = (pirateEmotionRefs.valveImpulse || 0) * 0.92;
+                if (pirateEmotionRefs.valves) {
+                    pirateEmotionRefs.valves.forEach((v, idx) => {
+                        v.rotation.y = Math.sin(time * (1.5 + fear * 3.5) + idx * 1.5) * (0.3 + fear * 0.4) + (pirateEmotionRefs.valveImpulse || 0) * 0.8;
+                    });
+                }
+            } else if (gameState.topDesign === 'kraken') {
+                // Segel Kraken: Bioluminescent arcane rune & eye pulsing
+                pirateEmotionRefs.eyeFlash = (pirateEmotionRefs.eyeFlash || 0) * 0.92;
+                const pulseSpeed = 2.0 + fear * 8.0;
+                const pulse = 0.9 + Math.sin(time * pulseSpeed) * (0.1 + fear * 0.15) + pirateEmotionRefs.eyeFlash * 0.2;
+
+                if (pirateEmotionRefs.eldritchEye) {
+                    pirateEmotionRefs.eldritchEye.scale.set(pulse, pulse * 0.9, pulse);
+                }
+                if (pirateEmotionRefs.runeGlowMat) {
+                    pirateEmotionRefs.runeGlowMat.emissiveIntensity = 0.85 + fear * 1.5 + pirateEmotionRefs.eyeFlash * 1.2;
+                }
+                if (pirateEmotionRefs.eyeGlowMat) {
+                    pirateEmotionRefs.eyeGlowMat.emissiveIntensity = 1.1 + fear * 2.0 + pirateEmotionRefs.eyeFlash * 1.8;
+                }
+                if (pirateEmotionRefs.tentacles) {
+                    pirateEmotionRefs.tentacles.forEach((t, idx) => {
+                        t.rotation.x = Math.sin(time * (1.5 + fear * 2.5) + idx * 1.5) * (0.03 + fear * 0.06);
+                    });
+                }
+            }
+        }
+
         function updatePhysicsAndParticles() {
             // Smooth Rotation Momentum & Damping
             if (!isPointerDown) {
@@ -906,6 +1495,8 @@
             currentRotationY += (targetRotationY - currentRotationY) * 0.22;
             barrelGroup.rotation.y = currentRotationY;
             gameState.rotationAngle = currentRotationY;
+
+            updatePirateEmotions();
 
             // Animate wooden shards and flying swords
             for (let i = woodenShards.length - 1; i >= 0; i--) {
@@ -1308,7 +1899,7 @@
             btn.disabled = true;
             try {
                 await leaveCurrentRoom();
-                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, code: null });
+                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, topDesign: selectedTopDesign, code: null });
                 currentRoomId = data.room.code;
                 gameState.mode = 'online';
                 resetOnlineSyncState();
@@ -1394,6 +1985,30 @@
             pollTimer = null;
         }
 
+        function updateTopDesignUI(activeDesign, isHostUser) {
+            const hostBadge = document.getElementById('design-host-badge');
+            if (hostBadge) {
+                hostBadge.classList.toggle('hidden', !(gameState.mode === 'online' && !isHostUser));
+                if (gameState.mode === 'online' && !isHostUser) {
+                    hostBadge.textContent = 'Dipilih Host';
+                }
+            }
+
+            document.querySelectorAll('.top-design-btn').forEach(btn => {
+                const design = btn.getAttribute('data-design');
+                const isSelected = design === activeDesign;
+                if (isSelected) {
+                    btn.className = "top-design-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02]";
+                    const title = btn.querySelector('p');
+                    if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
+                } else {
+                    btn.className = "top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 opacity-80";
+                    const title = btn.querySelector('p');
+                    if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
+                }
+            });
+        }
+
         /**
          * Single source of truth: render everything from the server room snapshot.
          */
@@ -1406,6 +2021,11 @@
             isHost = room.hostId === myUid;
             gameState.mode = 'online';
             gameState.players = room.players;
+
+            if (room.topDesign && room.topDesign !== gameState.topDesign) {
+                buildTopBarrelDesign(room.topDesign);
+            }
+            updateTopDesignUI(room.topDesign || selectedTopDesign, isHost);
 
             renderLobbyPlayers(room.players, room.hostId);
             updateHostOnlyControls(room);
@@ -1533,6 +2153,31 @@
         }
 
         function setupUIEvents() {
+            // Top Barrel Design Button Picker Events
+            document.querySelectorAll('.top-design-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const design = btn.getAttribute('data-design');
+                    if (!design) return;
+
+                    if (gameState.mode === 'online' && currentRoomId && !isHost) {
+                        showToast('Hanya HOST yang bisa mengubah dekorasi drum');
+                        return;
+                    }
+
+                    selectedTopDesign = design;
+                    buildTopBarrelDesign(design);
+                    updateTopDesignUI(design, isHost || gameState.mode === 'local');
+
+                    if (gameState.mode === 'online' && currentRoomId && isHost) {
+                        try {
+                            const data = await apiCall('setTopDesign', { topDesign: design });
+                            applyRoomState(data.room);
+                        } catch(err) {
+                            showToast(err.message);
+                        }
+                    }
+                });
+            });
             document.getElementById('tab-pass-play').addEventListener('click', () => {
                 document.getElementById('section-pass-play').classList.remove('hidden');
                 document.getElementById('section-online').classList.add('hidden');

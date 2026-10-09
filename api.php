@@ -132,10 +132,16 @@ switch ($action) {
             for ($i = 0; $i < 5; $i++) $code .= $chars[random_int(0, strlen($chars) - 1)];
         } while (file_exists(roomPath($code)));
 
+        $allowedDesigns = ['lid', 'energy', 'anchor', 'kraken', 'crown', 'compass', 'atom'];
+        $rawDesign = $input['topDesign'] ?? '';
+        $normalized = in_array($rawDesign, ['crown', 'compass', 'atom'], true) ? 'energy' : $rawDesign;
+        $topDesign = in_array($normalized, ['lid', 'energy', 'anchor', 'kraken'], true) ? $normalized : 'lid';
+
         $room = [
             'code' => $code,
             'hostId' => $uid,
             'status' => 'lobby',
+            'topDesign' => $topDesign,
             'slotCount' => $slotCount,
             'players' => [newPlayer($uid, $input['name'] ?? '')],
             'version' => 1,
@@ -145,6 +151,19 @@ switch ($action) {
         startRound($room);
         $room['round'] = 0;
         file_put_contents(roomPath($code), json_encode($room), LOCK_EX);
+        respond(publicRoom($room));
+    }
+
+    case 'setTopDesign': {
+        $rawDesign = $input['topDesign'] ?? 'lid';
+        $normalized = in_array($rawDesign, ['crown', 'compass', 'atom'], true) ? 'energy' : $rawDesign;
+        $design = in_array($normalized, ['lid', 'energy', 'anchor', 'kraken'], true) ? $normalized : 'lid';
+
+        $room = withRoom($code, function (&$room) use ($uid, $design) {
+            if ($room['hostId'] !== $uid) fail('Hanya HOST yang bisa mengubah dekorasi drum', 403);
+            $room['topDesign'] = $design;
+            return true;
+        });
         respond(publicRoom($room));
     }
 
