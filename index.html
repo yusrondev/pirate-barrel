@@ -71,70 +71,46 @@
         .safe-bottom {
             padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
         }
+        .bottom-floating-indicator {
+            position: fixed;
+            bottom: max(1.75rem, calc(env(safe-area-inset-bottom, 0px) + 1.25rem));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            pointer-events: none;
+            width: max-content;
+            max-width: 90vw;
+        }
     </style>
 </head>
-<body class="h-screen w-screen text-white relative flex flex-col justify-between overflow-hidden">
+<body class="min-h-[100dvh] h-[100dvh] w-screen text-white relative overflow-hidden select-none bg-slate-950">
 
     <!-- 3D Canvas Viewport -->
     <div id="canvas-container" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
 
-    <!-- Top Navigation Header (Includes Compact Turn Badge) -->
-    <header class="relative z-10 p-2 sm:p-3 flex justify-between items-center bg-black/60 backdrop-blur-md border-b border-amber-900/40 safe-top">
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-700 flex items-center justify-center border-2 border-yellow-500 shadow-md">
-                <i class="fa-solid fa-skull-crossbones text-yellow-300 text-sm sm:text-base"></i>
-            </div>
-            <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="font-pirate text-lg sm:text-2xl text-yellow-400 leading-none">PIRATE BARREL</h1>
-                    <!-- Compact Turn Badge in Header -->
-                    <span id="turn-badge" class="px-2 py-0.5 rounded-full bg-amber-900/90 border border-yellow-500/60 text-[11px] sm:text-xs font-bold text-yellow-300 flex items-center gap-1 shadow animate-pulse">
-                        <i class="fa-solid fa-hourglass-half text-[10px] text-yellow-400"></i>
-                        <span id="turn-text">Player 1</span>
-                    </span>
-                </div>
-                <p id="room-code-display" class="text-[10px] text-amber-200/70 font-mono">Pass & Play (Lokal)</p>
-            </div>
+    <!-- Top Navigation Header (Clean & Minimalist) -->
+    <header class="relative z-10 px-3 py-2.5 sm:px-5 sm:py-3 flex justify-between items-center bg-black/75 backdrop-blur-md border-b border-amber-900/40 safe-top">
+        <div class="flex flex-col justify-center">
+            <h1 class="font-pirate text-xl sm:text-2xl text-yellow-400 leading-none tracking-wider">PIRATE BARREL</h1>
+            <p id="room-code-display" class="text-[10px] sm:text-[11px] text-amber-300/70 font-mono tracking-wide mt-1">Pass & Play (Lokal)</p>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-1.5 sm:gap-2">
-            <button id="btn-toggle-scoreboard" class="px-2.5 sm:px-3.5 py-1.5 bg-amber-900/80 hover:bg-amber-800 active:scale-95 rounded-xl text-yellow-300 border border-amber-600/60 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition shadow">
-                <i class="fa-solid fa-trophy text-yellow-400"></i> <span class="hidden sm:inline">Skor</span>
+        <!-- Action Buttons (Clean Rounded Icon Buttons) -->
+        <div class="flex items-center gap-2">
+            <button id="btn-toggle-scoreboard" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900 active:scale-95 text-yellow-400 border border-amber-700/80 flex items-center justify-center transition shadow" title="Papan Skor">
+                <i class="fa-solid fa-trophy text-sm sm:text-base"></i>
             </button>
-            <button id="btn-toggle-menu" class="px-2.5 sm:px-3.5 py-1.5 bg-amber-950/90 hover:bg-amber-900 active:scale-95 rounded-xl text-amber-200 border border-amber-700/60 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition shadow">
-                <i class="fa-solid fa-users"></i> <span class="hidden sm:inline">Room</span>
+            <button id="btn-toggle-menu" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900 active:scale-95 text-yellow-400 border border-amber-700/80 flex items-center justify-center transition shadow" title="Room & Menu">
+                <i class="fa-solid fa-users text-sm sm:text-base"></i>
             </button>
         </div>
     </header>
 
-    <!-- Live Floating Leaderboard Widget (Desktop Only) -->
-    <div id="scoreboard-widget" class="absolute top-16 right-4 z-20 w-60 wood-card rounded-2xl p-3 border border-amber-700/60 shadow-2xl hidden lg:block transition-all">
-        <div class="flex justify-between items-center border-b border-amber-900/60 pb-2 mb-2">
-            <span class="font-pirate text-base text-yellow-400 flex items-center gap-2">
-                <i class="fa-solid fa-trophy text-yellow-500"></i> Leaderboard
-            </span>
-            <span class="text-[9px] text-amber-300/70 font-semibold uppercase">Poin</span>
-        </div>
-        <div id="scoreboard-widget-list" class="space-y-1 max-h-44 overflow-y-auto pr-1">
-            <!-- Dynamically populated -->
-        </div>
-    </div>
-
-    <!-- Bottom Game Controls -->
-    <div class="relative z-10 p-2 sm:p-4 flex flex-col items-center pointer-events-none mb-1 safe-bottom">
-        <!-- Manual Rotation Buttons -->
-        <div id="bottom-controls" class="pointer-events-auto flex items-center gap-3 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-amber-900/50 shadow-2xl transition-opacity">
-            <button id="btn-rotate-left" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-900/90 hover:bg-amber-800 active:scale-90 text-amber-300 flex items-center justify-center text-base sm:text-lg transition border border-amber-700/60 shadow" title="Putar Kiri">
-                <i class="fa-solid fa-rotate-left"></i>
-            </button>
-            <div class="text-center px-1">
-                <span class="text-[11px] sm:text-xs text-amber-300 font-bold block uppercase tracking-wider">Putar Drum</span>
-                <span class="text-[9px] sm:text-[10px] text-gray-400">Drag atau Tombol</span>
-            </div>
-            <button id="btn-rotate-right" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-900/90 hover:bg-amber-800 active:scale-90 text-amber-300 flex items-center justify-center text-base sm:text-lg transition border border-amber-700/60 shadow" title="Putar Kanan">
-                <i class="fa-solid fa-rotate-right"></i>
-            </button>
+    <!-- Bottom Floating Turn Indicator (Fixed, Adaptive & Safe from Screen Edge) -->
+    <div class="bottom-floating-indicator">
+        <div id="turn-badge" class="pointer-events-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-black/80 backdrop-blur-md border border-amber-700/80 text-xs sm:text-sm font-semibold text-yellow-300 flex items-center justify-center gap-2 shadow-2xl transition-all">
+            <i class="fa-solid fa-hourglass-half text-yellow-400 text-xs sm:text-sm"></i>
+            <span id="turn-text">Giliran: Player 1</span>
         </div>
     </div>
 
@@ -1078,22 +1054,28 @@
             window.addEventListener('pointerup', (e) => onPointerEnd(e.clientX, e.clientY));
             window.addEventListener('pointercancel', () => { isPointerDown = false; });
 
-            // UI Rotation Buttons
-            document.getElementById('btn-rotate-left').addEventListener('click', () => {
-                if (gameState.mode === 'online' && !isCurrentTurn()) return;
-                targetRotationY -= 0.65;
-                angularVelocity = -0.015;
-                AudioFX.playClick();
-                scheduleRoomRotationSync();
-            });
+            // UI Rotation Buttons (if present)
+            const btnRotateLeft = document.getElementById('btn-rotate-left');
+            if (btnRotateLeft) {
+                btnRotateLeft.addEventListener('click', () => {
+                    if (gameState.mode === 'online' && !isCurrentTurn()) return;
+                    targetRotationY -= 0.65;
+                    angularVelocity = -0.015;
+                    AudioFX.playClick();
+                    scheduleRoomRotationSync();
+                });
+            }
 
-            document.getElementById('btn-rotate-right').addEventListener('click', () => {
-                if (gameState.mode === 'online' && !isCurrentTurn()) return;
-                targetRotationY += 0.65;
-                angularVelocity = 0.015;
-                AudioFX.playClick();
-                scheduleRoomRotationSync();
-            });
+            const btnRotateRight = document.getElementById('btn-rotate-right');
+            if (btnRotateRight) {
+                btnRotateRight.addEventListener('click', () => {
+                    if (gameState.mode === 'online' && !isCurrentTurn()) return;
+                    targetRotationY += 0.65;
+                    angularVelocity = 0.015;
+                    AudioFX.playClick();
+                    scheduleRoomRotationSync();
+                });
+            }
         }
 
         function handleSlotClick(slotId) {
@@ -1163,8 +1145,8 @@
 
                 if (myTurn) {
                     if (turnBadge) {
-                        turnBadge.className = "px-2.5 py-0.5 rounded-full bg-emerald-900/90 border border-emerald-400 text-[11px] sm:text-xs font-bold text-emerald-300 flex items-center gap-1 shadow-lg animate-pulse";
-                        turnBadge.innerHTML = `<i class="fa-solid fa-play text-emerald-400 text-[10px]"></i> <span>GILIRAN KAMU!</span>`;
+                        turnBadge.className = "pointer-events-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-emerald-950/85 backdrop-blur-md border border-emerald-500/80 text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-2 shadow-2xl animate-pulse";
+                        turnBadge.innerHTML = `<i class="fa-solid fa-play text-emerald-400 text-xs sm:text-sm"></i> <span>GILIRAN KAMU!</span>`;
                     }
                     if (bottomControls) {
                         bottomControls.classList.remove('opacity-30', 'pointer-events-none');
@@ -1174,8 +1156,8 @@
                     }
                 } else {
                     if (turnBadge) {
-                        turnBadge.className = "px-2.5 py-0.5 rounded-full bg-amber-950/90 border border-amber-800 text-[11px] sm:text-xs font-semibold text-amber-300/90 flex items-center gap-1 shadow";
-                        turnBadge.innerHTML = `<i class="fa-solid fa-hourglass-half text-amber-400 text-[10px]"></i> <span>Giliran: ${activeName}</span>`;
+                        turnBadge.className = "pointer-events-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-black/80 backdrop-blur-md border border-amber-700/80 text-xs sm:text-sm font-semibold text-yellow-300 flex items-center justify-center gap-2 shadow-2xl";
+                        turnBadge.innerHTML = `<i class="fa-solid fa-hourglass-half text-yellow-500 text-xs sm:text-sm"></i> <span>Giliran: ${escapeHtml(activeName)}</span>`;
                     }
                     if (bottomControls) {
                         bottomControls.classList.add('opacity-30', 'pointer-events-none');
@@ -1187,8 +1169,8 @@
             } else {
                 activeName = gameState.players[gameState.currentTurnIndex]?.name || "Player 1";
                 if (turnBadge) {
-                    turnBadge.className = "px-2 py-0.5 rounded-full bg-amber-900/90 border border-yellow-500/60 text-[11px] sm:text-xs font-bold text-yellow-300 flex items-center gap-1 shadow animate-pulse";
-                    turnBadge.innerHTML = `<i class="fa-solid fa-hourglass-half text-[10px] text-yellow-400"></i> <span id="turn-text">${activeName}</span>`;
+                    turnBadge.className = "pointer-events-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-black/80 backdrop-blur-md border border-amber-700/80 text-xs sm:text-sm font-semibold text-yellow-300 flex items-center justify-center gap-2 shadow-2xl animate-pulse";
+                    turnBadge.innerHTML = `<i class="fa-solid fa-hourglass-half text-yellow-400 text-xs sm:text-sm"></i> <span id="turn-text">Giliran: ${escapeHtml(activeName)}</span>`;
                 }
                 if (bottomControls) {
                     bottomControls.classList.remove('opacity-30', 'pointer-events-none');
