@@ -142,115 +142,85 @@
             </div>
 
             <!-- Top Barrel Decoration Selector -->
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-1.5">
-                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Desain Atas Drum</label>
-                    <span id="design-host-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700/60 hidden">Host Setup</span>
+            <div class="mb-3">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-bold text-amber-300/80 uppercase tracking-wider">Desain Atas Drum</label>
+                    <div class="flex items-center gap-1">
+                        <span id="top-design-name-badge" class="text-[9px] text-yellow-300 bg-amber-950/90 px-1.5 py-0.5 rounded border border-amber-800/80 font-medium">Tutup Rahasia</span>
+                        <span id="design-host-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700/60 hidden">Host Setup</span>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-1.5" id="top-design-container">
-                    <button type="button" data-design="lid" class="top-design-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
-                        <span class="text-xl flex-shrink-0">🪵</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Tutup Rahasia</p>
-                            <p class="text-[9px] text-amber-300/80 truncate">Kayu & Relief Besi</p>
-                        </div>
+                <div class="grid grid-cols-4 gap-1.5" id="top-design-container">
+                    <button type="button" data-design="lid" class="top-design-btn py-1.5 px-1 rounded-xl bg-amber-900/90 border-2 border-yellow-500 flex flex-col items-center justify-center transition shadow">
+                        <span class="text-xl mb-0.5">🪵</span>
+                        <p class="text-[10px] font-bold text-yellow-300 leading-tight truncate w-full text-center">Tutup</p>
                     </button>
-                    <button type="button" data-design="energy" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">⚛️</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Inti Energi</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Plasma Surya & Orbital</p>
-                        </div>
+                    <button type="button" data-design="energy" class="top-design-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">⚛️</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Energi</p>
                     </button>
-                    <button type="button" data-design="anchor" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">⚓</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Jangkar Baja</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Rantai & Katup Besi</p>
-                        </div>
+                    <button type="button" data-design="anchor" class="top-design-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">⚓</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Jangkar</p>
                     </button>
-                    <button type="button" data-design="kraken" class="top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">🐙</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Segel Kraken</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Mata Gaib & Tentakel</p>
-                        </div>
+                    <button type="button" data-design="kraken" class="top-design-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">🐙</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Kraken</p>
                     </button>
                 </div>
             </div>
 
             <!-- Barrel Skin Theme Selector (Host Only in Online) -->
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-1.5">
-                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Tema Drum</label>
-                    <span id="barrel-skin-host-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700/60 hidden">Host Setup</span>
+            <div class="mb-3">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-bold text-amber-300/80 uppercase tracking-wider">Tema Drum</label>
+                    <div class="flex items-center gap-1">
+                        <span id="barrel-skin-name-badge" class="text-[9px] text-yellow-300 bg-amber-950/90 px-1.5 py-0.5 rounded border border-amber-800/80 font-medium">Kayu Ek</span>
+                        <span id="barrel-skin-host-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700/60 hidden">Host Setup</span>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-1.5" id="barrel-skin-container">
-                    <button type="button" data-barrel="classic" class="barrel-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
-                        <span class="text-xl flex-shrink-0">🪵</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Kayu Ek Klasik</p>
-                            <p class="text-[9px] text-amber-300/80 truncate">Kayu Tua & Ring Besi</p>
-                        </div>
+                <div class="grid grid-cols-4 gap-1.5" id="barrel-skin-container">
+                    <button type="button" data-barrel="classic" class="barrel-skin-btn py-1.5 px-1 rounded-xl bg-amber-900/90 border-2 border-yellow-500 flex flex-col items-center justify-center transition shadow">
+                        <span class="text-xl mb-0.5">🪵</span>
+                        <p class="text-[10px] font-bold text-yellow-300 leading-tight truncate w-full text-center">Kayu Ek</p>
                     </button>
-                    <button type="button" data-barrel="pumpkin" class="barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">🎃</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Buah Labu</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Kulit Oranye & Sulur Hijau</p>
-                        </div>
+                    <button type="button" data-barrel="pumpkin" class="barrel-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">🎃</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Labu</p>
                     </button>
-                    <button type="button" data-barrel="ghost" class="barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">👻</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Kapal Hantu</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Lumut & Tembaga Tua</p>
-                        </div>
+                    <button type="button" data-barrel="ghost" class="barrel-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">👻</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Hantu</p>
                     </button>
-                    <button type="button" data-barrel="magma" class="barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">🌋</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Batu Magma</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Basalt & Lava Pijar</p>
-                        </div>
+                    <button type="button" data-barrel="magma" class="barrel-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">🌋</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Magma</p>
                     </button>
                 </div>
             </div>
 
             <!-- Sword Skin Customization Selector -->
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-1.5">
-                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Skin Pedang Kamu</label>
-                    <span id="sword-skin-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800/70">Cutlass</span>
+            <div class="mb-3.5">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-bold text-amber-300/80 uppercase tracking-wider">Skin Pedang Kamu</label>
+                    <span id="sword-skin-badge" class="text-[9px] text-yellow-300 bg-amber-950/90 px-1.5 py-0.5 rounded border border-amber-800/80 font-medium">Cutlass</span>
                 </div>
-                <div class="grid grid-cols-2 gap-1.5" id="sword-skin-container">
-                    <button type="button" data-skin="classic" class="sword-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
-                        <span class="text-xl flex-shrink-0">🗡️</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Bajak Laut</p>
-                            <p class="text-[9px] text-amber-300/80 truncate">Baja & Gagang Kayu</p>
-                        </div>
+                <div class="grid grid-cols-4 gap-1.5" id="sword-skin-container">
+                    <button type="button" data-skin="classic" class="sword-skin-btn py-1.5 px-1 rounded-xl bg-amber-900/90 border-2 border-yellow-500 flex flex-col items-center justify-center transition shadow">
+                        <span class="text-xl mb-0.5">🗡️</span>
+                        <p class="text-[10px] font-bold text-yellow-300 leading-tight truncate w-full text-center">Bajak Laut</p>
                     </button>
-                    <button type="button" data-skin="laser" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">⚡</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Plasma Saber</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Bilah Neon Plasma</p>
-                        </div>
+                    <button type="button" data-skin="laser" class="sword-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">⚡</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Plasma</p>
                     </button>
-                    <button type="button" data-skin="fire" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">🔥</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Pedang Api</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Magma & Api Abadi</p>
-                        </div>
+                    <button type="button" data-skin="fire" class="sword-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">🔥</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Api</p>
                     </button>
-                    <button type="button" data-skin="bone" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">💀</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Pedang Tulang</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Tengkorak Terkutuk</p>
-                        </div>
+                    <button type="button" data-skin="bone" class="sword-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition">
+                        <span class="text-xl mb-0.5">💀</span>
+                        <p class="text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center">Tulang</p>
                     </button>
                 </div>
             </div>
@@ -3043,7 +3013,7 @@
 
         function updateSwordSkinUI(activeSkin) {
             const skinNames = {
-                classic: 'Cutlass',
+                classic: 'Bajak Laut',
                 laser: 'Plasma Saber',
                 fire: 'Pedang Api',
                 gold: 'Pedang Api',
@@ -3051,20 +3021,20 @@
             };
             const badge = document.getElementById('sword-skin-badge');
             if (badge) {
-                badge.textContent = skinNames[activeSkin] || 'Cutlass';
+                badge.textContent = skinNames[activeSkin] || 'Bajak Laut';
             }
 
             document.querySelectorAll('.sword-skin-btn').forEach(btn => {
                 const skin = btn.getAttribute('data-skin');
                 const isSelected = skin === activeSkin;
                 if (isSelected) {
-                    btn.className = "sword-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02]";
+                    btn.className = "sword-skin-btn py-1.5 px-1 rounded-xl bg-amber-900/90 border-2 border-yellow-500 flex flex-col items-center justify-center transition shadow scale-[1.04]";
                     const title = btn.querySelector('p');
-                    if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
+                    if (title) title.className = "text-[10px] font-bold text-yellow-300 leading-tight truncate w-full text-center";
                 } else {
-                    btn.className = "sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 opacity-80";
+                    btn.className = "sword-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition opacity-80";
                     const title = btn.querySelector('p');
-                    if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
+                    if (title) title.className = "text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center";
                 }
             });
         }
@@ -3214,6 +3184,17 @@
 
         function updateTopDesignUI(activeDesign, isHostUser) {
             const isOnline = gameState.mode === 'online' && !!currentRoomId;
+            const designNames = {
+                lid: 'Tutup Rahasia',
+                energy: 'Inti Energi',
+                anchor: 'Jangkar Baja',
+                kraken: 'Segel Kraken'
+            };
+            const nameBadge = document.getElementById('top-design-name-badge');
+            if (nameBadge) {
+                nameBadge.textContent = designNames[activeDesign] || 'Tutup Rahasia';
+            }
+
             const hostBadge = document.getElementById('design-host-badge');
             if (hostBadge) {
                 if (isOnline) {
@@ -3236,19 +3217,30 @@
                 const canClick = !isOnline || isHostUser;
 
                 if (isSelected) {
-                    btn.className = `top-design-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02] ${!canClick ? 'opacity-80 pointer-events-none' : ''}`;
+                    btn.className = `top-design-btn py-1.5 px-1 rounded-xl bg-amber-900/90 border-2 border-yellow-500 flex flex-col items-center justify-center transition shadow scale-[1.04] ${!canClick ? 'opacity-80 pointer-events-none' : ''}`;
                     const title = btn.querySelector('p');
-                    if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
+                    if (title) title.className = "text-[10px] font-bold text-yellow-300 leading-tight truncate w-full text-center";
                 } else {
-                    btn.className = `top-design-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 ${!canClick ? 'opacity-40 pointer-events-none cursor-not-allowed' : 'opacity-80'}`;
+                    btn.className = `top-design-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition ${!canClick ? 'opacity-40 pointer-events-none cursor-not-allowed' : 'opacity-80'}`;
                     const title = btn.querySelector('p');
-                    if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
+                    if (title) title.className = "text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center";
                 }
             });
         }
 
         function updateBarrelSkinUI(activeSkin, isHostUser) {
             const isOnline = gameState.mode === 'online' && !!currentRoomId;
+            const barrelNames = {
+                classic: 'Kayu Ek',
+                pumpkin: 'Buah Labu',
+                ghost: 'Kapal Hantu',
+                magma: 'Batu Magma'
+            };
+            const nameBadge = document.getElementById('barrel-skin-name-badge');
+            if (nameBadge) {
+                nameBadge.textContent = barrelNames[activeSkin] || 'Kayu Ek';
+            }
+
             const hostBadge = document.getElementById('barrel-skin-host-badge');
             if (hostBadge) {
                 if (isOnline) {
@@ -3271,13 +3263,13 @@
                 const canClick = !isOnline || isHostUser;
 
                 if (isSelected) {
-                    btn.className = `barrel-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02] ${!canClick ? 'opacity-80 pointer-events-none' : ''}`;
+                    btn.className = `barrel-skin-btn py-1.5 px-1 rounded-xl bg-amber-900/90 border-2 border-yellow-500 flex flex-col items-center justify-center transition shadow scale-[1.04] ${!canClick ? 'opacity-80 pointer-events-none' : ''}`;
                     const title = btn.querySelector('p');
-                    if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
+                    if (title) title.className = "text-[10px] font-bold text-yellow-300 leading-tight truncate w-full text-center";
                 } else {
-                    btn.className = `barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 ${!canClick ? 'opacity-40 pointer-events-none cursor-not-allowed' : 'opacity-80'}`;
+                    btn.className = `barrel-skin-btn py-1.5 px-1 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 flex flex-col items-center justify-center transition ${!canClick ? 'opacity-40 pointer-events-none cursor-not-allowed' : 'opacity-80'}`;
                     const title = btn.querySelector('p');
-                    if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
+                    if (title) title.className = "text-[10px] font-bold text-amber-200 leading-tight truncate w-full text-center";
                 }
             });
         }
