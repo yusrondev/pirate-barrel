@@ -47,7 +47,8 @@ function cleanName($name) {
 }
 
 function cleanSkin($skin) {
-    return in_array($skin, ['classic', 'laser', 'gold', 'bone'], true) ? $skin : 'classic';
+    if ($skin === 'gold') $skin = 'fire';
+    return in_array($skin, ['classic', 'laser', 'fire', 'bone'], true) ? $skin : 'classic';
 }
 
 function newPlayer($uid, $name, $swordSkin = 'classic') {

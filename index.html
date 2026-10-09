@@ -200,11 +200,11 @@
                             <p class="text-[9px] text-amber-400/60 truncate">Bilah Neon Plasma</p>
                         </div>
                     </button>
-                    <button type="button" data-skin="gold" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
-                        <span class="text-xl flex-shrink-0">👑</span>
+                    <button type="button" data-skin="fire" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">🔥</span>
                         <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Belati Emas</p>
-                            <p class="text-[9px] text-amber-400/60 truncate">Emas & Permata Ruby</p>
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Pedang Api</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Magma & Api Abadi</p>
                         </div>
                     </button>
                     <button type="button" data-skin="bone" class="sword-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
@@ -504,6 +504,46 @@
                     const nGain = this.ctx.createGain();
                     nGain.gain.setValueAtTime(0.25, now);
                     nGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    noise.connect(filter);
+                    filter.connect(nGain);
+                    nGain.connect(this.ctx.destination);
+                    noise.start(now);
+                } catch(e) {}
+            },
+            playFlameIgnite() {
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const now = this.ctx.currentTime;
+                    // Low fiery burst whoosh
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(380, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(now + 0.35);
+
+                    // Crackling fire noise
+                    const bufferSize = this.ctx.sampleRate * 0.4;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(1400, now);
+                    filter.frequency.linearRampToValueAtTime(250, now + 0.4);
+                    const nGain = this.ctx.createGain();
+                    nGain.gain.setValueAtTime(0.4, now);
+                    nGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
                     noise.connect(filter);
                     filter.connect(nGain);
                     nGain.connect(this.ctx.destination);
@@ -1442,7 +1482,7 @@
 
         function createSword3D(colorHex, skinType = 'classic') {
             const swordGroup = new THREE.Group();
-            const skin = ['classic', 'laser', 'gold', 'bone'].includes(skinType) ? skinType : 'classic';
+            const skin = ['classic', 'laser', 'fire', 'gold', 'bone'].includes(skinType) ? skinType : 'classic';
 
             if (skin === 'laser') {
                 // =========================================================================
@@ -1494,55 +1534,61 @@
                 pommel.position.z = 0.48;
                 swordGroup.add(pommel);
 
-            } else if (skin === 'gold') {
+            } else if (skin === 'fire' || skin === 'gold') {
                 // =========================================================================
-                // 2. ROYAL GOLD DAGGER (Polished Gold Blade, Ruby Crossguard & Velvet Handle)
+                // 2. INFERNAL FLAME BLADE (Charred Obsidian Blade, Molten Core & Ember Hilt)
                 // =========================================================================
-                const goldMat = new THREE.MeshStandardMaterial({
-                    color: 0xffd700,
-                    metalness: 0.95,
-                    roughness: 0.15
+                const obsidianMat = new THREE.MeshStandardMaterial({
+                    color: 0x1c1917,
+                    metalness: 0.92,
+                    roughness: 0.25
                 });
-                const rubyMat = new THREE.MeshStandardMaterial({
-                    color: 0xdc2626,
-                    emissive: 0x991b1b,
-                    emissiveIntensity: 1.5,
-                    roughness: 0.1
+                const magmaCoreMat = new THREE.MeshBasicMaterial({
+                    color: 0xff3b00
                 });
-                const velvetMat = new THREE.MeshStandardMaterial({
-                    color: colorHex,
-                    roughness: 0.75,
-                    metalness: 0.1
+                const guardMat = new THREE.MeshStandardMaterial({
+                    color: 0x7c2d12,
+                    metalness: 0.7,
+                    roughness: 0.35
+                });
+                const emberGripMat = new THREE.MeshStandardMaterial({
+                    color: 0x431407,
+                    roughness: 0.8
                 });
 
-                // Double-Edged Gold Blade
-                const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.4, 0.035), goldMat);
+                // Dark Obsidian Blade Body
+                const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.4, 0.035), obsidianMat);
                 blade.position.z = -0.7;
                 blade.rotation.x = Math.PI / 2;
                 blade.castShadow = true;
                 swordGroup.add(blade);
 
-                // Winged Golden Crossguard
-                const guardWing = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.075, 0.075), goldMat);
-                guardWing.position.z = 0.04;
-                swordGroup.add(guardWing);
+                // Burning Lava Core Stripe
+                const lavaCore = new THREE.Mesh(new THREE.BoxGeometry(0.045, 1.34, 0.04), magmaCoreMat);
+                lavaCore.position.z = -0.7;
+                lavaCore.rotation.x = Math.PI / 2;
+                swordGroup.add(lavaCore);
 
-                // Central Embedded Ruby Jewel
-                const ruby = new THREE.Mesh(new THREE.OctahedronGeometry(0.07), rubyMat);
-                ruby.position.z = 0.04;
-                swordGroup.add(ruby);
+                // Spiked Magma Crossguard
+                const guard = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.09, 0.08), guardMat);
+                guard.position.z = 0.04;
+                swordGroup.add(guard);
 
-                // Velvet Grip with Player Color
-                const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.36, 12), velvetMat);
+                // Glowing Molten Flame Crystal Core
+                const fireCrystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.075), new THREE.MeshBasicMaterial({ color: 0xff5500 }));
+                fireCrystal.position.z = 0.04;
+                swordGroup.add(fireCrystal);
+
+                // Charred Wrapped Grip
+                const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.36, 12), emberGripMat);
                 grip.position.z = 0.25;
                 grip.rotation.x = Math.PI / 2;
                 swordGroup.add(grip);
 
-                // Royal Crown Pommel
-                const crownPommel = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.06, 0.09, 8), goldMat);
-                crownPommel.position.z = 0.45;
-                crownPommel.rotation.x = Math.PI / 2;
-                swordGroup.add(crownPommel);
+                // Fiery Ember Pommel
+                const pommel = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), new THREE.MeshBasicMaterial({ color: 0xff4400 }));
+                pommel.position.z = 0.45;
+                swordGroup.add(pommel);
 
             } else if (skin === 'bone') {
                 // =========================================================================
@@ -1797,6 +1843,64 @@
             });
         }
 
+        function attachPersistentFlameEffect(sword, colorHex) {
+            AudioFX.playFlameIgnite();
+
+            const fireGroup = new THREE.Group();
+            fireGroup.position.set(0, 0, 0); // At hole entrance in sword coordinates
+            sword.add(fireGroup);
+
+            // Flickering Warm Fire PointLight
+            const fireLight = new THREE.PointLight(0xff5500, 2.8, 3.2, 1.8);
+            fireLight.position.set(0, 0, 0.15);
+            fireGroup.add(fireLight);
+
+            const flameParticles = [];
+            const numFlames = 24;
+            const flameColors = [0xffea00, 0xff7700, 0xff3300, 0xff0000, 0xffffff, 0xff9900, 0xfbbf24];
+
+            for (let i = 0; i < numFlames; i++) {
+                const geo = new THREE.OctahedronGeometry(0.07 + Math.random() * 0.05);
+                const color = flameColors[Math.floor(Math.random() * flameColors.length)];
+                const mat = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.85,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                fireGroup.add(mesh);
+
+                const resetFlame = (f) => {
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.random() * 0.14;
+                    // Spawn along the sword guard and hilt
+                    f.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0.03 + Math.random() * 0.38);
+                    const s = 0.6 + Math.random() * 0.7;
+                    f.scale.set(s, s * 1.5, s);
+                    f.userData = {
+                        speedY: 0.005 + Math.random() * 0.008,
+                        speedZ: (Math.random() - 0.5) * 0.003,
+                        phase: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.1,
+                        life: 1.0,
+                        decay: 0.022 + Math.random() * 0.022
+                    };
+                };
+
+                resetFlame(mesh);
+                mesh.userData.life = Math.random(); // Stagger initial lifetime
+                flameParticles.push({ mesh, reset: resetFlame });
+            }
+
+            sword.userData.fireEmitter = {
+                group: fireGroup,
+                light: fireLight,
+                flames: flameParticles
+            };
+        }
+
         function plugSwordIntoSlot(slotId, colorHex = 0xff4444, skinType = 'classic') {
             const slot = slots.find(s => s.id === slotId);
             if (!slot || slot.plugged) return;
@@ -1824,6 +1928,8 @@
                 spawnPlasmaCrawlingLightning(sword, colorHex);
             } else if (skinType === 'bone') {
                 spawnCursedBoneMist(sword, colorHex);
+            } else if (skinType === 'fire' || skinType === 'gold') {
+                attachPersistentFlameEffect(sword, colorHex);
             } else {
                 AudioFX.playInsert();
             }
@@ -2196,6 +2302,34 @@
                         if (puff.mesh.material) puff.mesh.material.dispose();
                     });
                     activeMistEffects.splice(i, 1);
+                }
+            }
+
+            // Animate Persistent Fire on Fire Swords (Api tidak akan padam)
+            for (let i = 0; i < pluggedSwords.length; i++) {
+                const sw = pluggedSwords[i];
+                if (sw.userData && sw.userData.fireEmitter) {
+                    const emitter = sw.userData.fireEmitter;
+                    if (emitter.light) {
+                        emitter.light.intensity = 2.0 + Math.random() * 1.5;
+                    }
+                    emitter.flames.forEach(f => {
+                        const m = f.mesh;
+                        m.userData.life -= m.userData.decay;
+                        m.position.y += m.userData.speedY;
+                        m.position.z += m.userData.speedZ;
+                        m.position.x += Math.sin(m.userData.phase + performance.now() * 0.008) * 0.0015;
+                        m.rotation.x += m.userData.rotSpeed;
+                        m.rotation.z += m.userData.rotSpeed;
+                        
+                        const s = Math.max(0.01, m.userData.life * 1.15);
+                        m.scale.set(s, s * 1.5, s);
+                        m.material.opacity = Math.min(0.9, m.userData.life * 1.25);
+
+                        if (m.userData.life <= 0.04) {
+                            f.reset(m);
+                        }
+                    });
                 }
             }
 
@@ -2620,7 +2754,8 @@
             const skinNames = {
                 classic: 'Cutlass',
                 laser: 'Plasma Saber',
-                gold: 'Belati Emas',
+                fire: 'Pedang Api',
+                gold: 'Pedang Api',
                 bone: 'Pedang Tulang'
             };
             const badge = document.getElementById('sword-skin-badge');
