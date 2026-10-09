@@ -46,6 +46,11 @@ function cleanName($name) {
     return mb_substr($name, 0, 20);
 }
 
+function cleanBarrelSkin($skin) {
+    if ($skin === 'cyber') $skin = 'pumpkin';
+    return in_array($skin, ['classic', 'pumpkin', 'ghost', 'magma'], true) ? $skin : 'classic';
+}
+
 function cleanSkin($skin) {
     if ($skin === 'gold') $skin = 'fire';
     return in_array($skin, ['classic', 'laser', 'fire', 'bone'], true) ? $skin : 'classic';
@@ -149,11 +154,14 @@ switch ($action) {
         $normalized = in_array($rawDesign, ['crown', 'compass', 'atom'], true) ? 'energy' : $rawDesign;
         $topDesign = in_array($normalized, ['lid', 'energy', 'anchor', 'kraken'], true) ? $normalized : 'lid';
 
+        $barrelSkin = cleanBarrelSkin($input['barrelSkin'] ?? 'classic');
+
         $room = [
             'code' => $code,
             'hostId' => $uid,
             'status' => 'lobby',
             'topDesign' => $topDesign,
+            'barrelSkin' => $barrelSkin,
             'slotCount' => $slotCount,
             'players' => [newPlayer($uid, $input['name'] ?? '', $input['swordSkin'] ?? 'classic')],
             'version' => 1,
@@ -163,6 +171,16 @@ switch ($action) {
         startRound($room);
         $room['round'] = 0;
         file_put_contents(roomPath($code), json_encode($room), LOCK_EX);
+        respond(publicRoom($room));
+    }
+
+    case 'setBarrelSkin': {
+        $skin = cleanBarrelSkin($input['barrelSkin'] ?? 'classic');
+        $room = withRoom($code, function (&$room) use ($uid, $skin) {
+            if ($room['hostId'] !== $uid) fail('Hanya HOST yang bisa mengubah tema drum', 403);
+            $room['barrelSkin'] = $skin;
+            return true;
+        });
         respond(publicRoom($room));
     }
 

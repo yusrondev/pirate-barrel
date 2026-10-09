@@ -179,6 +179,44 @@
                 </div>
             </div>
 
+            <!-- Barrel Skin Theme Selector (Host Only in Online) -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-semibold text-amber-300/80 uppercase tracking-wider">Tema Drum</label>
+                    <span id="barrel-skin-host-badge" class="text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700/60 hidden">Host Setup</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5" id="barrel-skin-container">
+                    <button type="button" data-barrel="classic" class="barrel-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow">
+                        <span class="text-xl flex-shrink-0">🪵</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-yellow-300 leading-tight truncate">Kayu Ek Klasik</p>
+                            <p class="text-[9px] text-amber-300/80 truncate">Kayu Tua & Ring Besi</p>
+                        </div>
+                    </button>
+                    <button type="button" data-barrel="pumpkin" class="barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">🎃</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Buah Labu</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Kulit Oranye & Sulur Hijau</p>
+                        </div>
+                    </button>
+                    <button type="button" data-barrel="ghost" class="barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">👻</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Kapal Hantu</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Lumut & Tembaga Tua</p>
+                        </div>
+                    </button>
+                    <button type="button" data-barrel="magma" class="barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2">
+                        <span class="text-xl flex-shrink-0">🌋</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-amber-200 leading-tight truncate">Batu Magma</p>
+                            <p class="text-[9px] text-amber-400/60 truncate">Basalt & Lava Pijar</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
             <!-- Sword Skin Customization Selector -->
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-1.5">
@@ -623,6 +661,8 @@
         let syncThrottleTimer = null;
 
         let selectedTopDesign = 'lid';
+        let selectedBarrelSkin = localStorage.getItem('pirate_barrel_skin') || 'classic';
+        if (selectedBarrelSkin === 'cyber') selectedBarrelSkin = 'pumpkin';
         let selectedSwordSkin = localStorage.getItem('pirate_sword_skin') || 'classic';
         let pirateEmotionRefs = {};
         let emotionAnimState = {
@@ -637,6 +677,7 @@
         let gameState = {
             mode: 'local',
             topDesign: 'lid',
+            barrelSkin: 'classic',
             players: [
                 { id: 'p1', name: 'Player 1', score: 0, swords: 0, wins: 0, losses: 0 },
                 { id: 'p2', name: 'Player 2', score: 0, swords: 0, wins: 0, losses: 0 },
@@ -722,7 +763,7 @@
             intactBarrelGroup = new THREE.Group();
             barrelGroup.add(intactBarrelGroup);
 
-            buildBarrel3D();
+            buildBarrel3D(selectedBarrelSkin);
             buildTopBarrelDesign(selectedTopDesign);
             createKeyholeSlots();
 
@@ -740,23 +781,134 @@
             setupInteractions();
         }
 
-        function createWoodTexture() {
+        function createBarrelTexture(skinType = 'classic') {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
             const ctx = canvas.getContext('2d');
 
-            ctx.fillStyle = '#8b5a2b';
-            ctx.fillRect(0, 0, 512, 512);
+            if (skinType === 'pumpkin') {
+                // Vibrant ripe pumpkin rind with vertical rib curves, grooves & warm speckles
+                const grad = ctx.createLinearGradient(0, 0, 512, 0);
+                grad.addColorStop(0.0, '#ea580c');
+                grad.addColorStop(0.25, '#fb923c');
+                grad.addColorStop(0.5, '#ea580c');
+                grad.addColorStop(0.75, '#f97316');
+                grad.addColorStop(1.0, '#c2410c');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 512);
 
-            ctx.fillStyle = '#5c3a19';
-            for (let i = 0; i < 350; i++) {
-                const x = Math.random() * 512;
-                const y = Math.random() * 512;
-                const w = Math.random() * 2 + 1;
-                const h = Math.random() * 80 + 20;
-                ctx.globalAlpha = Math.random() * 0.15;
-                ctx.fillRect(x, y, w, h);
+                // Vertical curved pumpkin rib grooves / segment creases
+                for (let rib = 0; rib < 8; rib++) {
+                    const rx = rib * 64 + 32;
+                    // Dark shadow crease
+                    ctx.fillStyle = '#7c2d12';
+                    ctx.globalAlpha = 0.45;
+                    ctx.fillRect(rx - 3, 0, 6, 512);
+
+                    ctx.fillStyle = '#451a03';
+                    ctx.globalAlpha = 0.55;
+                    ctx.fillRect(rx - 1, 0, 2, 512);
+
+                    // Warm highlight on rib crest
+                    ctx.fillStyle = '#ffedd5';
+                    ctx.globalAlpha = 0.25;
+                    ctx.fillRect(rx + 14, 0, 16, 512);
+                }
+
+                // Fine natural organic skin pores
+                ctx.fillStyle = '#fef3c7';
+                for (let i = 0; i < 350; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    ctx.globalAlpha = Math.random() * 0.18 + 0.05;
+                    ctx.beginPath();
+                    ctx.arc(x, y, Math.random() * 2 + 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Natural pumpkin speckles
+                ctx.fillStyle = '#431407';
+                for (let i = 0; i < 180; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    ctx.globalAlpha = Math.random() * 0.22;
+                    ctx.fillRect(x, y, Math.random() * 2 + 1, Math.random() * 4 + 1);
+                }
+                ctx.globalAlpha = 1.0;
+
+            } else if (skinType === 'ghost') {
+                // Decaying ghostly emerald sea-wood with moss stains
+                ctx.fillStyle = '#064e3b';
+                ctx.fillRect(0, 0, 512, 512);
+
+                ctx.fillStyle = '#022c22';
+                for (let i = 0; i < 300; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const w = Math.random() * 3 + 1;
+                    const h = Math.random() * 90 + 20;
+                    ctx.globalAlpha = Math.random() * 0.22;
+                    ctx.fillRect(x, y, w, h);
+                }
+
+                // Bioluminescent green moss flecks
+                ctx.fillStyle = '#10b981';
+                for (let i = 0; i < 90; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    ctx.globalAlpha = Math.random() * 0.18;
+                    ctx.beginPath();
+                    ctx.arc(x, y, Math.random() * 6 + 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+
+            } else if (skinType === 'magma') {
+                // Scorched basalt rock with glowing molten lava fissures
+                ctx.fillStyle = '#1c1917';
+                ctx.fillRect(0, 0, 512, 512);
+
+                ctx.fillStyle = '#292524';
+                for (let i = 0; i < 200; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    ctx.globalAlpha = Math.random() * 0.25;
+                    ctx.fillRect(x, y, Math.random() * 20 + 5, Math.random() * 20 + 5);
+                }
+
+                // Glowing lava fissure lines
+                ctx.strokeStyle = '#ea580c';
+                ctx.lineWidth = 2.5;
+                ctx.globalAlpha = 0.55;
+                for (let i = 0; i < 14; i++) {
+                    let lx = Math.random() * 512;
+                    let ly = 0;
+                    ctx.beginPath();
+                    ctx.moveTo(lx, ly);
+                    while (ly < 512) {
+                        lx += (Math.random() - 0.5) * 40;
+                        ly += Math.random() * 60 + 20;
+                        ctx.lineTo(lx, ly);
+                    }
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1.0;
+
+            } else {
+                // Classic Vintage Oak
+                ctx.fillStyle = '#8b5a2b';
+                ctx.fillRect(0, 0, 512, 512);
+
+                ctx.fillStyle = '#5c3a19';
+                for (let i = 0; i < 350; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const w = Math.random() * 2 + 1;
+                    const h = Math.random() * 80 + 20;
+                    ctx.globalAlpha = Math.random() * 0.15;
+                    ctx.fillRect(x, y, w, h);
+                }
             }
 
             const texture = new THREE.CanvasTexture(canvas);
@@ -766,13 +918,80 @@
             return texture;
         }
 
-        function buildBarrel3D() {
-            const woodTex = createWoodTexture();
-            const barrelMat = new THREE.MeshStandardMaterial({
-                map: woodTex,
-                roughness: 0.6,
-                metalness: 0.1
-            });
+        function createWoodTexture() {
+            return createBarrelTexture(selectedBarrelSkin || 'classic');
+        }
+
+        function buildBarrel3D(skinType = 'classic') {
+            const normalizedSkin = skinType === 'cyber' ? 'pumpkin' : skinType;
+            selectedBarrelSkin = ['classic', 'pumpkin', 'ghost', 'magma'].includes(normalizedSkin) ? normalizedSkin : 'classic';
+            gameState.barrelSkin = selectedBarrelSkin;
+
+            // Remove existing staves, caps, and bands
+            for (let i = intactBarrelGroup.children.length - 1; i >= 0; i--) {
+                const child = intactBarrelGroup.children[i];
+                if (child.userData && (child.userData.isStave || child.userData.isCap || child.userData.isBand)) {
+                    intactBarrelGroup.remove(child);
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                        else child.material.dispose();
+                    }
+                }
+            }
+
+            const woodTex = createBarrelTexture(selectedBarrelSkin);
+            let barrelMat, metalMat;
+
+            if (selectedBarrelSkin === 'pumpkin') {
+                barrelMat = new THREE.MeshStandardMaterial({
+                    map: woodTex,
+                    roughness: 0.48,
+                    metalness: 0.04
+                });
+                metalMat = new THREE.MeshStandardMaterial({
+                    color: 0x166534, // Forest vine green
+                    roughness: 0.65,
+                    metalness: 0.15
+                });
+            } else if (selectedBarrelSkin === 'ghost') {
+                barrelMat = new THREE.MeshStandardMaterial({
+                    map: woodTex,
+                    roughness: 0.75,
+                    metalness: 0.05
+                });
+                metalMat = new THREE.MeshStandardMaterial({
+                    color: 0x0d9488,
+                    emissive: 0x047857,
+                    emissiveIntensity: 0.8,
+                    metalness: 0.6,
+                    roughness: 0.5
+                });
+            } else if (selectedBarrelSkin === 'magma') {
+                barrelMat = new THREE.MeshStandardMaterial({
+                    map: woodTex,
+                    roughness: 0.85,
+                    metalness: 0.2
+                });
+                metalMat = new THREE.MeshStandardMaterial({
+                    color: 0xf97316,
+                    emissive: 0xc2410c,
+                    emissiveIntensity: 1.4,
+                    metalness: 0.6,
+                    roughness: 0.3
+                });
+            } else {
+                barrelMat = new THREE.MeshStandardMaterial({
+                    map: woodTex,
+                    roughness: 0.6,
+                    metalness: 0.1
+                });
+                metalMat = new THREE.MeshStandardMaterial({
+                    color: 0x4a5568,
+                    metalness: 0.8,
+                    roughness: 0.3
+                });
+            }
 
             const staveCount = 16;
             const angleStep = (Math.PI * 2) / staveCount;
@@ -813,12 +1032,6 @@
             intactBarrelGroup.add(capMeshBottom);
 
             // Metal Hoops
-            const metalMat = new THREE.MeshStandardMaterial({
-                color: 0x4a5568,
-                metalness: 0.8,
-                roughness: 0.3
-            });
-
             const bandHeights = [1.8, 0.9, -0.9, -1.8];
             const bandRadii = [2.02, 2.27, 2.27, 2.02];
 
@@ -1350,21 +1563,62 @@
         }
 
         function createKeyholeSlots() {
+            // Remove existing slots & hitboxes if rebuilding
+            for (let i = intactBarrelGroup.children.length - 1; i >= 0; i--) {
+                const child = intactBarrelGroup.children[i];
+                if (child.userData && child.userData.isSlot) {
+                    intactBarrelGroup.remove(child);
+                    child.traverse(c => {
+                        if (c.geometry) c.geometry.dispose();
+                        if (c.material) {
+                            if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+                            else c.material.dispose();
+                        }
+                    });
+                }
+            }
             slots = [];
             slotHitMeshes = [];
 
-            // Standard circular geometry for hole and brass grommet ring
+            // Standard circular geometry for hole and grommet ring
             const holeRadius = 0.15;
             const holeDepth = 0.18;
             const holeGeo = new THREE.CylinderGeometry(holeRadius, holeRadius, holeDepth, 24);
             const holeMat = new THREE.MeshBasicMaterial({ color: 0x080503 });
 
             const grommetGeo = new THREE.TorusGeometry(holeRadius + 0.02, 0.032, 10, 24);
-            const grommetMat = new THREE.MeshStandardMaterial({
-                color: 0xd4af37,
-                metalness: 0.85,
-                roughness: 0.25
-            });
+            let grommetMat;
+            if (selectedBarrelSkin === 'pumpkin') {
+                grommetMat = new THREE.MeshStandardMaterial({
+                    color: 0x84cc16, // Lime-gold vine ring
+                    emissive: 0x4d7c0f,
+                    emissiveIntensity: 0.5,
+                    metalness: 0.5,
+                    roughness: 0.35
+                });
+            } else if (selectedBarrelSkin === 'ghost') {
+                grommetMat = new THREE.MeshStandardMaterial({
+                    color: 0x22c55e,
+                    emissive: 0x16a34a,
+                    emissiveIntensity: 1.0,
+                    metalness: 0.6,
+                    roughness: 0.4
+                });
+            } else if (selectedBarrelSkin === 'magma') {
+                grommetMat = new THREE.MeshStandardMaterial({
+                    color: 0xfb923c,
+                    emissive: 0xea580c,
+                    emissiveIntensity: 1.3,
+                    metalness: 0.6,
+                    roughness: 0.3
+                });
+            } else {
+                grommetMat = new THREE.MeshStandardMaterial({
+                    color: 0xd4af37,
+                    metalness: 0.85,
+                    roughness: 0.25
+                });
+            }
 
             // Transparent circular hitbox for touch detection
             const hitGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.55, 16);
@@ -2812,6 +3066,7 @@
                 }
 
                 updateTopDesignUI(selectedTopDesign, isHost);
+                updateBarrelSkinUI(gameState.barrelSkin || selectedBarrelSkin, isHost);
             } else {
                 // Local mode or outside of room
                 if (nameInput) nameInput.disabled = false;
@@ -2823,6 +3078,7 @@
                 if (roleIndicator) roleIndicator.textContent = '';
 
                 updateTopDesignUI(selectedTopDesign, true);
+                updateBarrelSkinUI(selectedBarrelSkin, true);
             }
         }
 
@@ -2831,7 +3087,7 @@
             btn.disabled = true;
             try {
                 await leaveCurrentRoom();
-                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, topDesign: selectedTopDesign, swordSkin: selectedSwordSkin, code: null });
+                const data = await apiCall('create', { name: getPlayerName(), slotCount: slots.length || 18, topDesign: selectedTopDesign, barrelSkin: selectedBarrelSkin, swordSkin: selectedSwordSkin, code: null });
                 currentRoomId = data.room.code;
                 gameState.mode = 'online';
                 isHost = true;
@@ -2954,6 +3210,41 @@
             });
         }
 
+        function updateBarrelSkinUI(activeSkin, isHostUser) {
+            const isOnline = gameState.mode === 'online' && !!currentRoomId;
+            const hostBadge = document.getElementById('barrel-skin-host-badge');
+            if (hostBadge) {
+                if (isOnline) {
+                    hostBadge.classList.remove('hidden');
+                    if (isHostUser) {
+                        hostBadge.className = "text-[9px] text-yellow-400 bg-amber-950 px-1.5 py-0.5 rounded border border-yellow-600/70";
+                        hostBadge.innerHTML = '<i class="fa-solid fa-crown text-[8px] mr-1"></i>Host Setup';
+                    } else {
+                        hostBadge.className = "text-[9px] text-amber-400/80 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800/70";
+                        hostBadge.innerHTML = '<i class="fa-solid fa-lock text-[8px] mr-1"></i>Dipilih oleh Host';
+                    }
+                } else {
+                    hostBadge.classList.add('hidden');
+                }
+            }
+
+            document.querySelectorAll('.barrel-skin-btn').forEach(btn => {
+                const skin = btn.getAttribute('data-barrel');
+                const isSelected = skin === activeSkin;
+                const canClick = !isOnline || isHostUser;
+
+                if (isSelected) {
+                    btn.className = `barrel-skin-btn p-2 rounded-xl bg-amber-900/90 border-2 border-yellow-500 text-left transition flex items-center gap-2 shadow scale-[1.02] ${!canClick ? 'opacity-80 pointer-events-none' : ''}`;
+                    const title = btn.querySelector('p');
+                    if (title) title.className = "text-xs font-bold text-yellow-300 leading-tight truncate";
+                } else {
+                    btn.className = `barrel-skin-btn p-2 rounded-xl bg-amber-950/60 border border-amber-800/80 hover:border-amber-600 text-left transition flex items-center gap-2 ${!canClick ? 'opacity-40 pointer-events-none cursor-not-allowed' : 'opacity-80'}`;
+                    const title = btn.querySelector('p');
+                    if (title) title.className = "text-xs font-bold text-amber-200 leading-tight truncate";
+                }
+            });
+        }
+
         /**
          * Single source of truth: render everything from the server room snapshot.
          */
@@ -2969,6 +3260,10 @@
 
             if (room.topDesign && room.topDesign !== gameState.topDesign) {
                 buildTopBarrelDesign(room.topDesign);
+            }
+            if (room.barrelSkin && room.barrelSkin !== gameState.barrelSkin) {
+                buildBarrel3D(room.barrelSkin);
+                createKeyholeSlots();
             }
             updateRoomModalState();
 
@@ -3116,6 +3411,35 @@
                     if (gameState.mode === 'online' && currentRoomId && isHost) {
                         try {
                             const data = await apiCall('setTopDesign', { topDesign: design });
+                            applyRoomState(data.room);
+                        } catch(err) {
+                            showToast(err.message);
+                        }
+                    }
+                });
+            });
+
+            // Barrel Theme Skin Button Picker Events (Host only in online)
+            document.querySelectorAll('.barrel-skin-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const skin = btn.getAttribute('data-barrel');
+                    if (!skin) return;
+
+                    if (gameState.mode === 'online' && currentRoomId && !isHost) {
+                        showToast('Hanya HOST yang bisa mengubah tema drum');
+                        return;
+                    }
+
+                    selectedBarrelSkin = skin;
+                    localStorage.setItem('pirate_barrel_skin', skin);
+                    buildBarrel3D(skin);
+                    createKeyholeSlots();
+                    updateBarrelSkinUI(skin, isHost || gameState.mode === 'local');
+                    showToast(`Tema drum: ${btn.querySelector('p')?.textContent || skin}`, 'success');
+
+                    if (gameState.mode === 'online' && currentRoomId && isHost) {
+                        try {
+                            const data = await apiCall('setBarrelSkin', { barrelSkin: skin });
                             applyRoomState(data.room);
                         } catch(err) {
                             showToast(err.message);
